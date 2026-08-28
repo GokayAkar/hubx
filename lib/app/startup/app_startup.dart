@@ -14,6 +14,12 @@ class AppStartup extends Equatable {
   /// Where the user stands in the app's flows.
   final UserStatus status;
 
+  /// What the app opens with when its stored state could not be read.
+  static const fallback = AppStartup(
+    preferences: UserPreferences(),
+    status: UserStatus(),
+  );
+
   @override
   List<Object?> get props => [preferences, status];
 }

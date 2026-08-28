@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hubx/app/di/app_dependencies.dart';
@@ -40,6 +41,17 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
   });
 
+  testWidgets('leaves nothing under onboarding to walk back to', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await bootstrap());
+    await tester.pumpAndSettle();
+
+    final router = AutoRouter.of(tester.element(find.byType(Scaffold)));
+    expect(router.stack.map((route) => route.name), ['OnboardingRoute']);
+    expect(router.canPop(), isFalse);
+  });
+
   testWidgets('finishing onboarding lands on home and is remembered', (
     tester,
   ) async {
@@ -54,6 +66,26 @@ void main() {
       await DependencyProvider.get<OnboardingRepository>().isCompleted(),
       isTrue,
     );
+
+    // Onboarding is gone for good, and Home is not stacked on itself.
+    final router = AutoRouter.of(tester.element(find.byType(Scaffold)));
+    expect(router.stack.map((route) => route.name), ['HomeRoute']);
+    expect(router.canPop(), isFalse);
+  });
+
+  testWidgets('honours links that arrive after launch', (tester) async {
+    await tester.pumpWidget(await bootstrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Get started'));
+    await tester.pumpAndSettle();
+
+    // Only the entry point is redirected; the startup snapshot has no say
+    // over a link that arrives later.
+    await tester.binding.handlePushRoute(SettingsRoutes.root);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsOneWidget);
   });
 
   testWidgets('paints the very first frame with the persisted settings', (

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,8 +22,10 @@ class OnboardingPage extends StatelessWidget {
       create: (_) => DependencyProvider.get<OnboardingBloc>(),
       child: BlocConsumer<OnboardingBloc, OnboardingState>(
         listenWhen: (previous, current) => current.isCompleted,
+        // Replace, not push: onboarding leaves the stack for good, so back
+        // exits the app instead of returning to the flow.
         listener: (context, state) =>
-            context.router.replacePath(HomeRoutes.root),
+            unawaited(context.router.replacePath(HomeRoutes.root)),
         builder: (context, state) {
           return _OnboardingScreen(
             isSaving: state.isSaving,

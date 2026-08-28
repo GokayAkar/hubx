@@ -10,13 +10,26 @@ import 'package:hubx/features/settings/api/settings_api.dart';
 /// the path constants, e.g. `context.router.pushPath(SettingsRoutes.root)`.
 @AutoRouterConfig(replaceInRouteName: 'Page,Route')
 class AppRouter extends RootStackRouter {
+  AppRouter({required this.startOnOnboarding});
+
+  /// Decided once, at launch, from the startup snapshot.
+  final bool startOnOnboarding;
+
   @override
   RouteType get defaultRouteType => const RouteType.adaptive();
 
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(page: HomeRoute.page, path: HomeRoutes.root, initial: true),
-    AutoRoute(page: OnboardingRoute.page, path: OnboardingRoutes.root),
+    AutoRoute(
+      page: HomeRoute.page,
+      path: HomeRoutes.root,
+      initial: !startOnOnboarding,
+    ),
+    AutoRoute(
+      page: OnboardingRoute.page,
+      path: OnboardingRoutes.root,
+      initial: startOnOnboarding,
+    ),
     AutoRoute(page: SettingsRoute.page, path: SettingsRoutes.root),
   ];
 }

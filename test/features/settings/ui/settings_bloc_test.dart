@@ -9,18 +9,25 @@ import 'package:hubx/features/settings/ui/settings_ui.dart';
 class _FakeSettingsRepository implements SettingsRepository {
   ThemeMode themeMode = ThemeMode.system;
   Locale? locale;
+  bool writesFail = false;
 
   @override
   Future<ThemeMode> readThemeMode() async => themeMode;
 
   @override
-  Future<void> writeThemeMode(ThemeMode mode) async => themeMode = mode;
+  Future<void> writeThemeMode(ThemeMode mode) async {
+    if (writesFail) throw StateError('disk is full');
+    themeMode = mode;
+  }
 
   @override
   Future<Locale?> readLocale() async => locale;
 
   @override
-  Future<void> writeLocale(Locale? value) async => locale = value;
+  Future<void> writeLocale(Locale? value) async {
+    if (writesFail) throw StateError('disk is full');
+    locale = value;
+  }
 }
 
 void main() {
@@ -48,6 +55,30 @@ void main() {
       act: (bloc) => bloc.add(const SettingsThemeModeChanged(ThemeMode.dark)),
       expect: () => const [SettingsState(themeMode: ThemeMode.dark)],
       verify: (_) => expect(repository.themeMode, ThemeMode.dark),
+    );
+
+    blocTest<SettingsBloc, SettingsState>(
+      'rolls the theme back when the write fails',
+      setUp: () => repository.writesFail = true,
+      build: () => SettingsBloc(repository),
+      act: (bloc) => bloc.add(const SettingsThemeModeChanged(ThemeMode.dark)),
+      expect: () => const [
+        SettingsState(themeMode: ThemeMode.dark),
+        SettingsState(),
+      ],
+      errors: () => [isA<StateError>()],
+    );
+
+    blocTest<SettingsBloc, SettingsState>(
+      'rolls the locale back when the write fails',
+      setUp: () => repository.writesFail = true,
+      build: () => SettingsBloc(repository),
+      act: (bloc) => bloc.add(const SettingsLocaleChanged(Locale('tr'))),
+      expect: () => const [
+        SettingsState(locale: Locale('tr')),
+        SettingsState(),
+      ],
+      errors: () => [isA<StateError>()],
     );
 
     blocTest<SettingsBloc, SettingsState>(

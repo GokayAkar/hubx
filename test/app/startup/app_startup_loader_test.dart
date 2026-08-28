@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hubx/app/di/app_dependencies.dart';
+import 'package:hubx/app/startup/app_startup.dart';
 import 'package:hubx/app/startup/app_startup_loader.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -23,6 +24,15 @@ void main() {
       expect(startup.preferences.themeMode, ThemeMode.system);
       expect(startup.preferences.locale, isNull);
       expect(startup.status.isOnboardingCompleted, isFalse);
+    });
+
+    test('falls back instead of failing when storage throws', () async {
+      await seed();
+      // Nothing registered under KeyValueStorageFactory any more, so every
+      // read below fails.
+      await DependencyProvider.reset();
+
+      expect(await AppStartupLoader.loadOrFallback(), AppStartup.fallback);
     });
 
     test('reads preferences and status that were written before', () async {

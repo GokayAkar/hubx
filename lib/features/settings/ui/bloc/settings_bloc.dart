@@ -26,20 +26,37 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     SettingsThemeModeChanged event,
     Emitter<SettingsState> emit,
   ) async {
+    // Applied first so the UI reacts immediately, rolled back if the write
+    // fails — showing a preference that was never stored is worse than a
+    // moment of the old one.
+    final previous = state.themeMode;
     emit(state.copyWith(themeMode: event.themeMode));
-    await _repository.writeThemeMode(event.themeMode);
+
+    try {
+      await _repository.writeThemeMode(event.themeMode);
+    } on Object catch (error, stackTrace) {
+      addError(error, stackTrace);
+      emit(state.copyWith(themeMode: previous));
+    }
   }
 
   Future<void> _onLocaleChanged(
     SettingsLocaleChanged event,
     Emitter<SettingsState> emit,
   ) async {
+    final previous = state.locale;
     emit(
       state.copyWith(
         locale: event.locale,
         resetLocale: event.locale == null,
       ),
     );
-    await _repository.writeLocale(event.locale);
+
+    try {
+      await _repository.writeLocale(event.locale);
+    } on Object catch (error, stackTrace) {
+      addError(error, stackTrace);
+      emit(state.copyWith(locale: previous, resetLocale: previous == null));
+    }
   }
 }

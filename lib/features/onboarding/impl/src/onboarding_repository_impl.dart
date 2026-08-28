@@ -8,8 +8,7 @@ class _OnboardingRepositoryImpl implements OnboardingRepository {
   final KeyValueStorage _storage;
 
   @override
-  Future<bool> isCompleted() async =>
-      await _storage.read(_completed) ?? false;
+  Future<bool> isCompleted() async => await _storage.read(_completed) ?? false;
 
   @override
   Future<void> markCompleted() => _storage.write(_completed, true);

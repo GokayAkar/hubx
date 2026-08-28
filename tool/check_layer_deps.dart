@@ -8,7 +8,8 @@ import 'dart:io';
 /// Files allowed to import an `impl/` library: the composition root.
 const _allowedPrefixes = ['lib/app/di/'];
 
-final _implImport = RegExp(r"""import\s+'package:hubx/([^']*impl/[^']*)'""");
+/// Matches any import, so relative paths are caught as well as package URIs.
+final _import = RegExp(r"""import\s+'([^']+)'""");
 
 Future<void> main() async {
   final violations = <String>[];
@@ -17,11 +18,16 @@ Future<void> main() async {
     if (entity is! File || !entity.path.endsWith('.dart')) continue;
 
     final path = entity.path;
-    if (path.contains('/impl/')) continue;
     if (_allowedPrefixes.any(path.startsWith)) continue;
 
-    for (final match in _implImport.allMatches(entity.readAsStringSync())) {
-      violations.add('$path -> package:hubx/${match.group(1)}');
+    for (final match in _import.allMatches(entity.readAsStringSync())) {
+      final uri = match.group(1)!;
+      if (!uri.contains('impl/')) continue;
+      // Another package's internals are its own business.
+      if (uri.startsWith('package:') && !uri.startsWith('package:hubx/')) {
+        continue;
+      }
+      violations.add('$path -> $uri');
     }
   }
 
@@ -31,8 +37,10 @@ Future<void> main() async {
   }
 
   stderr
-    ..writeln('Implementation libraries may only be imported from '
-        '${_allowedPrefixes.join(', ')}:')
+    ..writeln(
+      'Implementation libraries may only be imported from '
+      '${_allowedPrefixes.join(', ')}:',
+    )
     ..writeln(violations.map((v) => '  $v').join('\n'));
   exitCode = 1;
 }

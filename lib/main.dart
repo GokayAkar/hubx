@@ -13,8 +13,9 @@ Future<void> main() async {
   AppDependencies.attachErrorHandlers();
 
   // Preferences and status are read here, so the first frame already uses the
-  // right theme and language and lands on the right screen.
-  final startup = await AppStartupLoader.load();
+  // right theme and language and lands on the right screen. A failure must
+  // still produce a usable app rather than a blank window.
+  final startup = await AppStartupLoader.loadOrFallback();
 
   runApp(App(startup: startup));
 }

@@ -6,7 +6,6 @@ import 'package:hubx/app/startup/app_startup.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
 import 'package:hubx/core/theme/app_theme.dart';
-import 'package:hubx/features/onboarding/api/onboarding_api.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 import 'package:hubx/features/settings/ui/settings_ui.dart';
 import 'package:hubx/l10n/generated/app_localizations.dart';
@@ -22,8 +21,16 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  /// The router is created once so navigation state survives rebuilds.
-  final _appRouter = AppRouter();
+  /// Created once, from the startup snapshot: which screen the app opens on is
+  /// a launch-time decision, so it is baked into the router instead of being
+  /// re-evaluated on every incoming link.
+  late final AppRouter _appRouter = AppRouter(
+    startOnOnboarding: !widget.startup.status.isOnboardingCompleted,
+  );
+
+  /// Built once: a new config on every rebuild would cancel an in-flight route
+  /// parse, silently dropping a deep link that arrives during a theme change.
+  late final RouterConfig<UrlState> _routerConfig = _appRouter.config();
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +50,7 @@ class _AppState extends State<App> {
         builder: (context, state) {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
-            routerConfig: _appRouter.config(
-              deepLinkBuilder: _resolveEntryPoint,
-            ),
+            routerConfig: _routerConfig,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: state.themeMode,
@@ -59,12 +64,4 @@ class _AppState extends State<App> {
     );
   }
 
-  /// Onboarding gates the app: until it is finished every entry point — a cold
-  /// start or an incoming deep link — leads there. Afterwards the platform link
-  /// is honoured as-is.
-  DeepLink _resolveEntryPoint(DeepLink platformLink) {
-    return widget.startup.status.isOnboardingCompleted
-        ? platformLink
-        : const DeepLink.path(OnboardingRoutes.root);
-  }
 }

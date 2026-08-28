@@ -13,6 +13,24 @@ import 'package:hubx/features/settings/api/settings_api.dart';
 abstract final class AppStartupLoader {
   static const _source = LogSource('startup');
 
+  /// [load], falling back to [AppStartup.fallback] if anything goes wrong.
+  ///
+  /// Losing stored preferences is bad; refusing to start is worse.
+  static Future<AppStartup> loadOrFallback() async {
+    try {
+      return await load();
+    } on Object catch (error, stackTrace) {
+      DependencyProvider.getOrNull<Logger>()
+          ?.withSource(_source)
+          .error(
+            'Startup could not be loaded, falling back to defaults',
+            error: error,
+            stackTrace: stackTrace,
+          );
+      return AppStartup.fallback;
+    }
+  }
+
   static Future<AppStartup> load() async {
     final settings = DependencyProvider.get<SettingsRepository>();
     final onboarding = DependencyProvider.get<OnboardingRepository>();
