@@ -1,0 +1,17 @@
+{
+  "@@locale": "tr",
+  "appTitle": "HubX",
+  "homeTitle": "Ana Sayfa",
+  "homeGreeting": "Merhaba, {name}!",
+  "onboardingTitle": "HubX'e hoş geldin",
+  "onboardingBody": "Birkaç adımda her şey hazır olacak.",
+  "onboardingContinue": "Başla",
+  "settingsTitle": "Ayarlar",
+  "settingsAppearance": "Görünüm",
+  "settingsLanguage": "Dil",
+  "themeSystem": "Sistem",
+  "themeLight": "Açık",
+  "themeDark": "Koyu",
+  "languageSystem": "Sistem dili",
+  "counterLabel": "{count, plural, =0{Henüz dokunulmadı} =1{Bir kez dokunuldu} other{{count} kez dokunuldu}}"
+}

@@ -1,0 +1,38 @@
+name: hubx
+description: "HubX Flutter application."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  auto_route: ^11.1.0
+  bloc: ^9.2.1
+  equatable: ^2.1.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_localizations:
+    sdk: flutter
+  get_it: ^9.2.1
+  intl: any
+  json_annotation: ^4.12.0
+  meta: ^1.17.0
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  auto_route_generator: ^10.5.0
+  bloc_test: ^10.0.0
+  build_runner: ^2.15.1
+  flutter_test:
+    sdk: flutter
+  json_serializable: ^6.14.1
+  shared_preferences_platform_interface: ^2.4.2
+  very_good_analysis: ^10.2.0
+
+flutter:
+  uses-material-design: true
+
+  # Enables gen-l10n during `flutter pub get` / build
+  generate: true

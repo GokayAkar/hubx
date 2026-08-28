@@ -1,0 +1,22 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:hubx/app/router/app_router.gr.dart';
+import 'package:hubx/features/home/api/home_api.dart';
+import 'package:hubx/features/onboarding/api/onboarding_api.dart';
+import 'package:hubx/features/settings/api/settings_api.dart';
+
+/// Maps the paths published by each feature's `api` to that feature's pages.
+///
+/// Features never reference each other's route classes — they navigate with
+/// the path constants, e.g. `context.router.pushPath(SettingsRoutes.root)`.
+@AutoRouterConfig(replaceInRouteName: 'Page,Route')
+class AppRouter extends RootStackRouter {
+  @override
+  RouteType get defaultRouteType => const RouteType.adaptive();
+
+  @override
+  List<AutoRoute> get routes => [
+    AutoRoute(page: HomeRoute.page, path: HomeRoutes.root, initial: true),
+    AutoRoute(page: OnboardingRoute.page, path: OnboardingRoutes.root),
+    AutoRoute(page: SettingsRoute.page, path: SettingsRoutes.root),
+  ];
+}

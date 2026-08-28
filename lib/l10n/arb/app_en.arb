@@ -1,0 +1,48 @@
+{
+  "@@locale": "en",
+  "appTitle": "HubX",
+  "@appTitle": {
+    "description": "Application name shown in the task switcher"
+  },
+  "homeTitle": "Home",
+  "@homeTitle": {},
+  "homeGreeting": "Hello, {name}!",
+  "@homeGreeting": {
+    "description": "Greeting on the home page",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Gokay"
+      }
+    }
+  },
+  "onboardingTitle": "Welcome to HubX",
+  "@onboardingTitle": {},
+  "onboardingBody": "A couple of steps and you are ready to go.",
+  "@onboardingBody": {},
+  "onboardingContinue": "Get started",
+  "@onboardingContinue": {},
+  "settingsTitle": "Settings",
+  "@settingsTitle": {},
+  "settingsAppearance": "Appearance",
+  "@settingsAppearance": {},
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {},
+  "themeSystem": "System",
+  "@themeSystem": {},
+  "themeLight": "Light",
+  "@themeLight": {},
+  "themeDark": "Dark",
+  "@themeDark": {},
+  "languageSystem": "System language",
+  "@languageSystem": {},
+  "counterLabel": "{count, plural, =0{No taps yet} =1{Tapped once} other{Tapped {count} times}}",
+  "@counterLabel": {
+    "description": "Plural example",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}

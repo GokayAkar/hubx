@@ -1,0 +1,18 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.gr.dart"
+    - "lib/l10n/generated/**"
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    # Docs are expected on public API of packages, too noisy for an app.
+    public_member_api_docs: false
+    # `flutter run` prints are useful during development.
+    avoid_print: true
+    # Single-method contracts are the point of the api/impl split.
+    one_member_abstracts: false
