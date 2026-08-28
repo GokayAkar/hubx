@@ -8,6 +8,10 @@ Future<void> main() async {
 
   AppDependencies.register();
 
+  // Framework errors, uncaught async errors and bloc activity now reach the
+  // logger too.
+  AppDependencies.attachErrorHandlers();
+
   // Preferences and status are read here, so the first frame already uses the
   // right theme and language and lands on the right screen.
   final startup = await AppStartupLoader.load();

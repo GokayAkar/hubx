@@ -5,7 +5,7 @@
 // Run with: dart run tool/check_layer_deps.dart
 import 'dart:io';
 
-/// Files allowed to import an `impl/` library.
+/// Files allowed to import an `impl/` library: the composition root.
 const _allowedPrefixes = ['lib/app/di/'];
 
 final _implImport = RegExp(r"""import\s+'package:hubx/([^']*impl/[^']*)'""");
