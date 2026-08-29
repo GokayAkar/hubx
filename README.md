@@ -26,8 +26,9 @@ lib/features/<name>/
                               public member
           src/*.dart       -> part files; classes are prefixed with _
   ui/     <name>_ui.dart   -> barrel; register<Name>Ui() + exported widgets
-          bloc/            -> bloc + event + state
-          view/            -> page (DI + bloc) and screen (pure widget)
+          <screen>/        -> one folder per screen: its page (DI + bloc), its
+                              view (pure widget) and its bloc/ if it has one
+          shared/          -> only once two screens actually share something
 ```
 
 Privacy here is not a convention but a **compiler guarantee**: files under
@@ -115,7 +116,8 @@ lib/core/
             impl/ Dio registration
   storage/  api/  KeyValueStorage + StorageKey<T> + KeyValueStorageFactory
             impl/ shared_preferences implementation (private)
-  theme/    light + dark ThemeData, and the design-unit dimension tokens
+  theme/    colours, typography, dimensions, and the ThemeData built from them
+  ui/       the few widgets that exist to make a mistake hard to make
   extensions/ context.l10n, context.colors, context.textTheme
 ```
 
@@ -298,6 +300,7 @@ assets/images/
   onboarding/welcome.webp       1080x1454
   onboarding/scan.webp          1080x1584
   onboarding/detail.webp        1080x1605
+  onboarding/title_brush.webp    404x33
   paywall/background.webp       1080x1398
 ```
 
@@ -342,6 +345,78 @@ keeps up to a hundred rows of nothing.
 Give every image that carries meaning a `semanticLabel`, and every decorative
 one `excludeFromSemantics: true` — otherwise a screen reader either says
 nothing useful or repeats what the text beside it already said.
+
+### Onboarding
+
+One folder per screen — `ui/welcome/` and `ui/steps/` — rather than one folder
+per kind. Grouping by kind (`view/`, `widgets/`, `bloc/`) puts a screen's parts
+in three places and hides which of them belong together; grouping by screen
+means everything a screen needs is in one folder, and deleting the screen
+deletes the folder. There is no `shared/`: nothing is shared yet, and a folder
+for that can be made the day something is.
+
+Two routes. `/onboarding` is the welcome screen — no indicator, its own call to
+action, and passed through once. `/onboarding/steps` holds the two illustrated
+pages in a `PageView`.
+
+They are separate because the button and the indicator have to hold still while
+the pages slide: inside the `PageView` they travelled with the page. Only the
+heading and the picture are in the pages; everything below sits in the screen
+around them.
+
+The indicator shows three dots for a flow of three screens, so on the steps it
+starts at the second — `AnimatedSmoothIndicator` with `activeIndex: page + 1`
+rather than the controller-driven variant, which assumes dot and page indices
+match.
+
+Finishing the last page marks onboarding done and replaces the route with
+`/paywall`. Marked *before* the handover, so quitting on the paywall does not
+send the user back through the flow.
+
+The hand-drawn stroke under the emphasised words is placed from a
+**measurement**, not from padding:
+[EmphasisedText](lib/core/ui/emphasised_text.dart) lays the sentence out with a
+`TextPainter` and asks `getBoxesForSelection` where the emphasised run actually
+landed, then stretches the brush to each box. That is what makes it survive a
+longer translation, a larger system text size, and a phrase that wrapped onto a
+second line — the cases where a fixed-width underline drifts off the words.
+
+### Typography
+
+The design has 25 text styles; Material's `TextTheme` has 15 slots, and seven
+of the design's styles are 16px differing only in line height. There is no
+honest mapping, so [app_text_styles.dart](lib/core/theme/app_text_styles.dart)
+is the source of truth and `AppTheme` builds a `TextTheme` from the handful
+Material's own widgets read.
+
+Tokens are named for what the designer says — weight and size — with the line
+height appended only where two would collide:
+
+```dart
+AppTextStyles.extraBold28      // 28 / 800 / 100% / -1
+AppTextStyles.semiBold16Lh24   // 16 / 600 / 24
+AppTextStyles.semiBold16Lh21   // 16 / 600 / 21
+AppTextStyles.underlined(AppTextStyles.regular11Lh15)
+```
+
+Line heights are stored as the design's pixel value divided by the font size,
+because Flutter's `height` is a multiple — that ratio is what survives scaling.
+Roboto is bundled at five weights (300/400/500/600/800); the 600 and 800 are
+not in the Flutter SDK and were fetched from Google Fonts, and bundling rather
+than downloading keeps iOS, where Roboto is not a system font, identical to
+Android.
+
+### Safe areas
+
+Every screen is guaranteed a gap at the bottom, whether or not the device gives
+one. A phone with a home indicator already leaves room; an SE or most Androids
+leave none, and content lands on the edge.
+
+The rule is applied once, in `MaterialApp.builder` in
+[app.dart](lib/app/app.dart), by raising `MediaQuery.padding.bottom` to at
+least `AppSpacing.s24`. Screens then use a plain `SafeArea()` and get it for
+free — as do bottom sheets and snack bars, which read the same inset. No screen
+has to remember, and there is nothing to repeat.
 
 ### Accessibility
 

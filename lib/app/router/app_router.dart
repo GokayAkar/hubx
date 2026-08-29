@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:hubx/app/router/app_router.gr.dart';
 import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/onboarding/api/onboarding_api.dart';
+import 'package:hubx/features/paywall/api/paywall_api.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 
 /// Maps the paths published by each feature's `api` to that feature's pages.
@@ -26,10 +27,12 @@ class AppRouter extends RootStackRouter {
       initial: !startOnOnboarding,
     ),
     AutoRoute(
-      page: OnboardingRoute.page,
+      page: OnboardingWelcomeRoute.page,
       path: OnboardingRoutes.root,
       initial: startOnOnboarding,
     ),
+    AutoRoute(page: OnboardingStepsRoute.page, path: OnboardingRoutes.steps),
+    AutoRoute(page: PaywallRoute.page, path: PaywallRoutes.root),
     AutoRoute(page: SettingsRoute.page, path: SettingsRoutes.root),
   ];
 }

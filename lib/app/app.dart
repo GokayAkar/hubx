@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:hubx/core/theme/app_theme.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 import 'package:hubx/features/settings/ui/settings_ui.dart';
 import 'package:hubx/l10n/generated/app_localizations.dart';
+
 
 class App extends StatefulWidget {
   const App({required this.startup, super.key});
@@ -34,6 +37,26 @@ class _AppState extends State<App> {
   /// parse, silently dropping a deep link that arrives during a theme change.
   late final RouterConfig<UrlState> _routerConfig = _appRouter.config();
 
+  /// Guarantees a minimum gap at the bottom of every screen.
+  ///
+  /// A phone with a home indicator already leaves room; one without — an SE,
+  /// most Androids — leaves none, and content ends up on the edge. Raising the
+  /// inset here rather than in each screen means every `SafeArea` in the app
+  /// gets it, including the ones inside bottom sheets and snack bars, and no
+  /// screen has to remember.
+  Widget _withBottomBreathingRoom(BuildContext context, Widget? child) {
+    final media = MediaQuery.of(context);
+    final bottom = math.max(media.padding.bottom, AppSpacing.s24);
+
+    return MediaQuery(
+      data: media.copyWith(
+        padding: media.padding.copyWith(bottom: bottom),
+        viewPadding: media.viewPadding.copyWith(bottom: bottom),
+      ),
+      child: child ?? const SizedBox.shrink(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final preferences = widget.startup.preferences;
@@ -55,6 +78,7 @@ class _AppState extends State<App> {
           builder: (context, state) {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
+              builder: _withBottomBreathingRoom,
               routerConfig: _routerConfig,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,

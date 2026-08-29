@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hubx/core/theme/app_colors.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
+import 'package:hubx/core/theme/app_text_styles.dart';
 
 /// Single source of truth for the light and dark [ThemeData] of the app.
 abstract final class AppTheme {
@@ -19,6 +21,22 @@ abstract final class AppTheme {
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
+      fontFamily: AppTextStyles.fontFamily,
+      // Material's own widgets read from here, so the design's styles reach an
+      // AppBar or a button without every screen restating them.
+      textTheme: TextTheme(
+        headlineLarge: AppTextStyles.extraBold28,
+        headlineMedium: AppTextStyles.medium28,
+        headlineSmall: AppTextStyles.regular28,
+        titleLarge: AppTextStyles.medium20,
+        titleMedium: AppTextStyles.semiBold16,
+        bodyLarge: AppTextStyles.regular16,
+        bodyMedium: AppTextStyles.regular13,
+        bodySmall: AppTextStyles.regular12,
+        labelLarge: AppTextStyles.semiBold16,
+        labelMedium: AppTextStyles.regular12,
+        labelSmall: AppTextStyles.regular11,
+      ),
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
@@ -29,6 +47,9 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.surface,
+          textStyle: AppTextStyles.semiBold16,
           minimumSize: Size.fromHeight(AppSize.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.r12),

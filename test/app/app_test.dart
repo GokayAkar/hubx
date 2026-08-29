@@ -26,6 +26,16 @@ void main() {
 
   const onboarded = {'onboarding.completed': true};
 
+  /// Walks the welcome screen and the two steps behind it.
+  Future<void> finishOnboarding(WidgetTester tester) async {
+    await tester.tap(find.text('Get Started'));
+    await tester.pumpAndSettle();
+    for (var page = 0; page < 2; page++) {
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+    }
+  }
+
   setUp(DependencyProvider.reset);
 
   /// Widget tests default to an 800x600 surface, which is no phone. Rendering
@@ -43,7 +53,7 @@ void main() {
     await tester.pumpWidget(await bootstrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to HubX'), findsOneWidget);
+    expect(find.text('Welcome to PlantApp'), findsOneWidget);
   });
 
   testWidgets('opens home once onboarding is done', (tester) async {
@@ -60,28 +70,31 @@ void main() {
     await tester.pumpAndSettle();
 
     final router = AutoRouter.of(tester.element(find.byType(Scaffold)));
-    expect(router.stack.map((route) => route.name), ['OnboardingRoute']);
+    expect(
+      router.stack.map((route) => route.name),
+      ['OnboardingWelcomeRoute'],
+    );
     expect(router.canPop(), isFalse);
   });
 
-  testWidgets('finishing onboarding lands on home and is remembered', (
+  testWidgets('finishing onboarding hands over to the paywall', (
     tester,
   ) async {
     await tester.pumpWidget(await bootstrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Get started'));
-    await tester.pumpAndSettle();
+    await finishOnboarding(tester);
 
-    expect(find.text('Home'), findsOneWidget);
+    // Marked done before the handover, so killing the app on the paywall does
+    // not send the user back through onboarding.
     expect(
       await DependencyProvider.get<OnboardingRepository>().isCompleted(),
       isTrue,
     );
 
-    // Onboarding is gone for good, and Home is not stacked on itself.
+    // Onboarding is gone for good: back from the paywall exits the app.
     final router = AutoRouter.of(tester.element(find.byType(Scaffold)));
-    expect(router.stack.map((route) => route.name), ['HomeRoute']);
+    expect(router.stack.map((route) => route.name), ['PaywallRoute']);
     expect(router.canPop(), isFalse);
   });
 
@@ -89,8 +102,7 @@ void main() {
     await tester.pumpWidget(await bootstrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Get started'));
-    await tester.pumpAndSettle();
+    await finishOnboarding(tester);
 
     // Only the entry point is redirected; the startup snapshot has no say
     // over a link that arrives later.

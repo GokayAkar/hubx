@@ -16,11 +16,25 @@
       }
     }
   },
-  "onboardingTitle": "Welcome to HubX",
-  "@onboardingTitle": {},
-  "onboardingBody": "A couple of steps and you are ready to go.",
-  "@onboardingBody": {},
-  "onboardingContinue": "Get started",
+  "onboardingWelcomeTitle": "Welcome to **PlantApp**",
+  "@onboardingWelcomeTitle": {
+    "description": "Text between ** is the emphasised half of the heading"
+  },
+  "onboardingWelcomeBody": "Identify more than 3000+ plants and 88% accuracy.",
+  "@onboardingWelcomeBody": {},
+  "onboardingWelcomeAction": "Get Started",
+  "@onboardingWelcomeAction": {},
+  "onboardingLegal": "By tapping next, you are agreeing to PlantID",
+  "@onboardingLegal": {},
+  "onboardingTermsOfUse": "Terms of Use",
+  "@onboardingTermsOfUse": {},
+  "onboardingPrivacyPolicy": "Privacy Policy",
+  "@onboardingPrivacyPolicy": {},
+  "onboardingScanTitle": "Take a photo to **identify** the plant!",
+  "@onboardingScanTitle": {},
+  "onboardingCareTitle": "Get plant **care guides**",
+  "@onboardingCareTitle": {},
+  "onboardingContinue": "Continue",
   "@onboardingContinue": {},
   "homeIncrement": "Count one more",
   "@homeIncrement": {

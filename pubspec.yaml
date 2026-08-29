@@ -23,6 +23,7 @@ dependencies:
   json_annotation: ^4.12.0
   meta: ^1.17.0
   shared_preferences: ^2.5.5
+  smooth_page_indicator: ^3.0.0
 
 dev_dependencies:
   auto_route_generator: ^10.5.0
@@ -46,6 +47,22 @@ flutter:
     - assets/images/home/
     - assets/images/onboarding/
     - assets/images/paywall/
+
+  # Bundled rather than downloaded at runtime: the app must look the same on
+  # iOS, where Roboto is not a system font, and on first launch offline.
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Roboto-ExtraBold.ttf
+          weight: 800
 
 # Turns asset paths into constants: a wrong file name stops compiling instead
 # of throwing at runtime.

@@ -35,6 +35,8 @@ abstract final class AppSpacing {
 
   static double get s48 => 48.w;
 
+  static double get s64 => 64.w;
+
   /// The standard horizontal padding of a screen. Named for what it is, not
   /// what it measures, because it is a decision rather than a number.
   static double get page => s16;
