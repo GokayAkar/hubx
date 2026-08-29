@@ -47,4 +47,5 @@ app.*.map.json
 # Generated code
 *.g.dart
 *.gr.dart
+*.gen.dart
 lib/l10n/generated/

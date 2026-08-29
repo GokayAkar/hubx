@@ -288,6 +288,61 @@ real phone would show fails the test.
 [app_dimensions_test.dart](test/core/theme/app_dimensions_test.dart) covers the
 scaling itself at 320, 360 and 430.
 
+### Assets
+
+One folder per feature, so a screen's images sit next to nothing else:
+
+```
+assets/images/
+  home/search_background.webp   1080x525
+  onboarding/welcome.webp       1080x1454
+  onboarding/scan.webp          1080x1584
+  onboarding/detail.webp        1080x1605
+  paywall/background.webp       1080x1398
+```
+
+Flutter does not recurse into subfolders, so each one gets its own line under
+`assets:` in `pubspec.yaml`. `flutter_gen` mirrors the structure —
+`Assets.images.onboarding.welcome` — and a wrong name stops compiling instead
+of throwing on the device. Run `dart run build_runner build` after adding a
+file.
+
+**One file per image, not 1x/2x/3x variants.** Every variant ships in the app
+bundle even though a device uses one, so three of them cost *more* download
+than a single file at the largest size. The cost is memory: a 1080-wide image
+decodes to the same bitmap on every phone, so pass `cacheWidth` where an image
+is shown small.
+
+Size each file as **display width in points x 3** — not "3x of the Figma
+frame". A full-width image on the largest phone needs about 1080 physical
+pixels; something shown at 100 pt needs 300, and shipping 1080 for it is
+waste.
+
+**WebP.** Flutter decodes it natively on both platforms, alpha included.
+
+Pick the quality by measuring rather than by habit: `cwebp -print_psnr` reports
+the distortion, and **42 dB is the usual visually-lossless threshold**. Sweep
+downwards and take the lowest setting that still clears it — the answer differs
+per image, from q85 for the onboarding photographs to q80 for the paywall
+background, which is 7x smaller than lossless at 46 dB. Lossless is worth it
+only for flat artwork with hard edges.
+
+```bash
+cwebp -q 85 -alpha_q 100 -exact -crop <x> <y> <w> <h> in.png -o out.webp
+cwebp -q 85 in.png -o /dev/null -print_psnr   # check before committing
+```
+
+Crop in `cwebp`, not `sips` — `sips --cropOffset` exits 0 and silently does
+nothing.
+
+**Crop the transparent margin, measured at `alpha > 16`.** Figma leaves a
+shadow tail whose alpha is non-zero but invisible; trimming at `alpha > 0`
+keeps up to a hundred rows of nothing.
+
+Give every image that carries meaning a `semanticLabel`, and every decorative
+one `excludeFromSemantics: true` — otherwise a screen reader either says
+nothing useful or repeats what the text beside it already said.
+
 ### Accessibility
 
 [accessibility_test.dart](test/app/accessibility_test.dart) runs Flutter's own

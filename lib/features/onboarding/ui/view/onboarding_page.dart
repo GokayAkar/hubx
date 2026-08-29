@@ -8,6 +8,7 @@ import 'package:hubx/core/extensions/build_context_x.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/onboarding/ui/bloc/onboarding_bloc.dart';
+import 'package:hubx/gen/assets.gen.dart';
 
 /// Placeholder for the real onboarding flow.
 ///
@@ -52,24 +53,43 @@ class _OnboardingScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.s32),
+          // The copy scrolls and the call to action stays put: at the largest
+          // system text size the text alone is taller than a phone, and a
+          // button the user cannot reach is worse than a scroll.
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                context.l10n.onboardingTitle,
-                style: context.textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: AppSpacing.s12),
-              Text(
-                context.l10n.onboardingBody,
-                style: context.textTheme.bodyLarge?.copyWith(
-                  color: context.colors.onSurfaceVariant,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Decorative: the title and body already say everything
+                      // this picture does, so a screen reader skips it rather
+                      // than announcing it twice.
+                      Assets.images.onboarding.welcome.image(
+                        fit: BoxFit.contain,
+                        excludeFromSemantics: true,
+                      ),
+                      SizedBox(height: AppSpacing.s32),
+                      Text(
+                        context.l10n.onboardingTitle,
+                        style: context.textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: AppSpacing.s12),
+                      Text(
+                        context.l10n.onboardingBody,
+                        style: context.textTheme.bodyLarge?.copyWith(
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-                textAlign: TextAlign.center,
               ),
-              SizedBox(height: AppSpacing.s48),
+              SizedBox(height: AppSpacing.s24),
               FilledButton(
                 onPressed: isSaving ? null : onFinish,
                 child: Text(context.l10n.onboardingContinue),

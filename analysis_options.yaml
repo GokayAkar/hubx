@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.gr.dart"
+    - "**/*.gen.dart"
     - "lib/l10n/generated/**"
   errors:
     invalid_annotation_target: ignore
