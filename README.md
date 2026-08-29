@@ -288,6 +288,36 @@ real phone would show fails the test.
 [app_dimensions_test.dart](test/core/theme/app_dimensions_test.dart) covers the
 scaling itself at 320, 360 and 430.
 
+### Accessibility
+
+[accessibility_test.dart](test/app/accessibility_test.dart) runs Flutter's own
+guidelines over every screen, so a regression fails the build rather than
+reaching a user. **The screen list is the router's** — a screen has to be
+registered there to be reachable at all, so a new one cannot quietly skip these
+checks:
+
+| Guideline | What it protects |
+|---|---|
+| `androidTapTargetGuideline` / `iOSTapTargetGuideline` | targets big enough to hit — 48dp and 44pt |
+| `labeledTapTargetGuideline` | every tappable says what it does out loud |
+| `textContrastGuideline` | text stands out enough from what is behind it |
+
+Plus each screen is rendered at `TextScaler.linear(2)` and must not overflow —
+that is the setting most likely to break a layout in the real world.
+
+Two habits keep it passing:
+
+- Use [AppIconButton](lib/core/ui/app_icon_button.dart) for icon-only buttons:
+  its `label` is required, so the accessible version is the default rather than
+  the diligent one. Where an icon is the whole label of some other control,
+  `Icon(Icons.add, semanticLabel: …)` does the same job.
+- Never give a control a fixed `height`. `AppSize.controlHeight` is a
+  *minimum*, so a button grows when the text does.
+
+The wrapper is the convenience; the test is the guarantee. Nothing stops
+someone reaching for a bare `IconButton`, and that is fine — the route-driven
+test fails when its label is missing.
+
 ### Storage
 
 Storage is namespaced: each feature takes its own space with

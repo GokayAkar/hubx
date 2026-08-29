@@ -22,6 +22,10 @@
   "@onboardingBody": {},
   "onboardingContinue": "Get started",
   "@onboardingContinue": {},
+  "homeIncrement": "Count one more",
+  "@homeIncrement": {
+    "description": "Screen reader label for the button that raises the count"
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {},
   "settingsAppearance": "Appearance",

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
+import 'package:hubx/core/ui/app_icon_button.dart';
 import 'package:hubx/features/home/ui/bloc/home_bloc.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 
@@ -50,9 +51,9 @@ class _HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(context.l10n.homeTitle),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: context.l10n.settingsTitle,
+          AppIconButton(
+            icon: Icons.settings_outlined,
+            label: context.l10n.settingsTitle,
             onPressed: onOpenSettings,
           ),
         ],
@@ -75,7 +76,12 @@ class _HomeScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.s32),
               child: FilledButton(
                 onPressed: onTap,
-                child: const Icon(Icons.add),
+                // The icon is the whole label, so it carries the one a screen
+                // reader announces.
+                child: Icon(
+                  Icons.add,
+                  semanticLabel: context.l10n.homeIncrement,
+                ),
               ),
             ),
           ],
