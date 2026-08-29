@@ -9,6 +9,8 @@ environment:
 dependencies:
   auto_route: ^11.1.0
   bloc: ^9.2.1
+  dio: ^5.11.0
+  dio_smart_retry: ^7.0.1
   equatable: ^2.1.0
   flutter:
     sdk: flutter

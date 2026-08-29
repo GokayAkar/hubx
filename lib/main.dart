@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hubx/app/app.dart';
 import 'package:hubx/app/di/app_dependencies.dart';
 import 'package:hubx/app/startup/app_startup_loader.dart';
-import 'package:hubx/app/view/app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

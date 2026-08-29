@@ -82,7 +82,7 @@ Blocs fall into two groups:
   instance per screen, owned and closed by `BlocProvider(create:)`
   (see [home_ui.dart](lib/features/home/ui/home_ui.dart)).
 - **App-wide blocs** stay out of DI entirely and are created at the top of the
-  widget tree (see `SettingsBloc` in [app.dart](lib/app/view/app.dart)).
+  widget tree (see `SettingsBloc` in [app.dart](lib/app/app.dart)).
   A singleton bloc in a service locator loses its lifecycle: nothing ever calls
   `close()`.
 
@@ -105,12 +105,14 @@ lib/app/
   di/       composition root
   startup/  AppStartup + AppStartupLoader (what is read at launch)
   router/   path -> page mapping
-  view/     the App widget
+  app.dart  the App widget
 
 lib/core/
   di/       DependencyProvider (get_it facade)
   logging/  api/  Logger + LogSink + LogSinkRegistry + LogEntry
-            impl/ console sink, fan-out logger, bloc observer (private)
+            impl/ console sink, log distributor, bloc observer (private)
+  network/  api/  ApiException + RemoteService
+            impl/ Dio registration
   storage/  api/  KeyValueStorage + StorageKey<T> + KeyValueStorageFactory
             impl/ shared_preferences implementation (private)
   theme/    light + dark ThemeData from a single seed color
@@ -163,6 +165,88 @@ streams the app does not own: `FlutterError.onError` (UI errors),
 `PlatformDispatcher.onError` (uncaught async errors) and `Bloc.observer` — so
 every dispatched bloc event becomes a user-action record on its own, with no
 log lines sprinkled through the screens.
+
+### Networking
+
+Dio does the work, and stays inside
+[RemoteService](lib/core/network/api/remote_service.dart) — a feature's service
+never imports it. That is not to keep the option of swapping Dio; it is so
+there is exactly one path a request can take, and no service can skip the error
+translation by awaiting Dio itself.
+
+Two things live in [core/network/api](lib/core/network/api/):
+
+**A sealed `ApiException`**, so failures are reasoned about by what went wrong
+rather than by `DioExceptionType`. (`Api…`, not `Http…`: `dart:io` already
+exports an `HttpException`, and a file importing both would not compile.)
+
+| Exception | Meaning |
+|---|---|
+| `ApiStatusException` | the server answered, not with success (`isUnauthorized`, `isClientError`, `isServerError`) |
+| `ApiConnectionException` | the server could not be reached |
+| `ApiTimeoutException` | one of the configured timeouts elapsed |
+| `ApiCancelledException` | the app cancelled it — not a failure |
+| `ApiParsingException` | the body arrived but did not fit the model |
+| `ApiUnknownException` | unclassifiable, including a response with no status code |
+
+**`RemoteService`**, which every feature's remote data source extends. It
+offers `get` / `post` / `put` / `patch` / `delete`, each taking a path and a
+`JsonParser<T>`; the error translation, reporting and parser wrapping happen
+once, inside:
+
+```dart
+class _CardsService extends RemoteService {
+  const _CardsService(super.dio, super.logger);
+
+  Future<List<CardDto>> fetchCards() => get(
+    '/cards',
+    (json) => [for (final item in json! as List) CardDto.fromJson(item)],
+  );
+
+  Future<void> order(String type) =>
+      post('/cards', (_) {}, body: {'type': type});
+}
+```
+
+Dio features these verbs do not cover — cancellation, upload progress,
+multipart — are added to `RemoteService` as they are needed, rather than by
+reaching around it.
+
+Two interceptors are installed, in this order:
+
+1. **Tracing** — every attempt is logged at `debug`: method, path, status and
+   duration. Request and response bodies only in debug builds, and sensitive
+   headers (`authorization`, `cookie`, `x-api-key`, …) are always redacted;
+   these entries are meant to reach a remote sink one day. `debug` is below the
+   release threshold, so none of it costs anything in production.
+2. **Retry** (`dio_smart_retry`) — 2 attempts, 200ms then 500ms, with our own
+   evaluator rather than the package's. It retries **idempotent methods only**
+   (`GET`/`HEAD`/`PUT`/`DELETE`/`OPTIONS`), because a timed-out POST may well
+   have reached the server and replaying it would place a second order — the
+   package's default would. And only on failures that plausibly pass:
+   timeouts, connection errors, and 408/429/502/503/504. Not 500: a server that
+   threw will throw again, and retrying doubles the load on something already
+   struggling.
+
+Anything added later runs after both:
+`DependencyProvider.get<Dio>().interceptors.add(...)`.
+
+**Failures are reported by `RemoteService`, not by an interceptor.** An
+interceptor sees every failure — including the ones a later interceptor
+recovers from — and never sees a parse failure at all, so it can neither log
+the truth nor stay quiet about a request that ended up succeeding. Severity
+follows what actually happened: 5xx, transport failures and a body that did not
+fit the model are errors; a 4xx is a warning, because not-logged-in and
+not-found are the app's normal life; a cancelled request is debug, because the
+app asked for it. Services are constructed with a logger already tagged with
+their feature's source, so a failure names the feature whose call failed.
+
+**Prepared for auth.** A `QueuedInterceptor` attaches the token, and on a 401
+refreshes it and replays the request. Queuing serialises concurrent failures,
+but each still arrives holding its own 401 — so the interceptor compares the
+token the request was sent with against the current one and refreshes only if
+nobody already did. Both behaviours are covered in
+[remote_service_test.dart](test/core/network/remote_service_test.dart).
 
 ### Storage
 

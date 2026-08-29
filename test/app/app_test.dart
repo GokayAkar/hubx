@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hubx/app/app.dart';
 import 'package:hubx/app/di/app_dependencies.dart';
 import 'package:hubx/app/startup/app_startup_loader.dart';
-import 'package:hubx/app/view/app.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/features/onboarding/api/onboarding_api.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
