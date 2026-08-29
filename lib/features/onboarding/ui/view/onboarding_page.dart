@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
+import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/onboarding/ui/bloc/onboarding_bloc.dart';
 
@@ -50,7 +51,7 @@ class _OnboardingScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: EdgeInsets.all(AppSpacing.s32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,7 +61,7 @@ class _OnboardingScreen extends StatelessWidget {
                 style: context.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.s12),
               Text(
                 context.l10n.onboardingBody,
                 style: context.textTheme.bodyLarge?.copyWith(
@@ -68,7 +69,7 @@ class _OnboardingScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: AppSpacing.s48),
               FilledButton(
                 onPressed: isSaving ? null : onFinish,
                 child: Text(context.l10n.onboardingContinue),

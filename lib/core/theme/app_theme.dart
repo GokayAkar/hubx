@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hubx/core/theme/app_dimensions.dart';
 
 /// Single source of truth for the light and dark [ThemeData] of the app.
 abstract final class AppTheme {
@@ -28,9 +29,9 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(48),
+          minimumSize: Size.fromHeight(AppSize.controlHeight),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.r12),
           ),
         ),
       ),
@@ -38,14 +39,18 @@ abstract final class AppTheme {
         clipBehavior: Clip.antiAlias,
         elevation: 0,
         color: colorScheme.surfaceContainer,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.r16),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.r12),
+        ),
       ),
-      listTileTheme: const ListTileThemeData(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      listTileTheme: ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.s16),
       ),
     );
   }

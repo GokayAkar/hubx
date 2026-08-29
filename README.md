@@ -115,7 +115,7 @@ lib/core/
             impl/ Dio registration
   storage/  api/  KeyValueStorage + StorageKey<T> + KeyValueStorageFactory
             impl/ shared_preferences implementation (private)
-  theme/    light + dark ThemeData from a single seed color
+  theme/    light + dark ThemeData, and the design-unit dimension tokens
   extensions/ context.l10n, context.colors, context.textTheme
 ```
 
@@ -247,6 +247,46 @@ but each still arrives holding its own 401 — so the interceptor compares the
 token the request was sent with against the current one and refreshes only if
 nobody already did. Both behaviours are covered in
 [remote_service_test.dart](test/core/network/remote_service_test.dart).
+
+### Dimensions
+
+The design is drawn on a **360 x 800** frame, and every dimension in the app is
+expressed in those units. `flutter_screenutil` scales them by the device's
+width, so a value read off the design lands proportionally on any phone:
+
+```dart
+Padding(padding: EdgeInsets.all(AppSpacing.s16))   // 16 on a 360 phone,
+                                                   // 19 on a 430 one
+```
+
+Use the tokens in [app_dimensions.dart](lib/core/theme/app_dimensions.dart)
+rather than raw numbers — that scale is what keeps screens looking like one
+app, and it is the same scale the design is drawn on:
+
+| Group | Values | Scaled by |
+|---|---|---|
+| `AppSpacing` | `s4` `s8` `s12` `s16` `s24` `s32` `s48`, plus `page` (= 16) | width (`.w`) |
+| `AppRadius` | `r8` `r12` `r16` `r24` | the smaller ratio (`.r`), so a circle stays a circle |
+| `AppSize` | `icon20`, `icon24`, `controlHeight` (48) | `.r`, with 48 as a floor |
+
+Tokens are named for the value on the design, so "24 gap" in a review becomes
+`AppSpacing.s24` with nothing to look up — and because only the steps of the
+scale exist, a stray 13 or 17 cannot be typed in. Where a number is really a
+decision rather than a measurement, it gets a name instead: `AppSpacing.page`,
+`AppSize.controlHeight`.
+
+Two deliberate choices:
+
+- **Vertical gaps scale by width too.** Scaling them by height instead would
+  stretch a square into a rectangle and make the rhythm differ between a short
+  and a tall phone.
+- **`controlHeight` never drops below 48.** A finger does not shrink with the
+  screen, so the minimum touch target is a floor rather than a proportion.
+
+Widget tests render at the reference frame, so the scale is 1 and an overflow a
+real phone would show fails the test.
+[app_dimensions_test.dart](test/core/theme/app_dimensions_test.dart) covers the
+scaling itself at 320, 360 and 430.
 
 ### Storage
 

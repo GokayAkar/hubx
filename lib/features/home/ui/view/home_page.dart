@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
+import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/home/ui/bloc/home_bloc.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 
@@ -64,14 +65,14 @@ class _HomeScreen extends StatelessWidget {
               context.l10n.homeGreeting('Gokay'),
               style: context.textTheme.headlineSmall,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.s8),
             Text(
               context.l10n.counterLabel(count),
               style: context.textTheme.bodyLarge,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.s24),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.s32),
               child: FilledButton(
                 onPressed: onTap,
                 child: const Icon(Icons.add),

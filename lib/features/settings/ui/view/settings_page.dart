@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
+import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/settings/ui/bloc/settings_bloc.dart';
 import 'package:hubx/l10n/generated/app_localizations.dart';
 
@@ -59,7 +60,7 @@ class _SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 32),
+          Divider(height: AppSpacing.s32),
           _SectionHeader(context.l10n.settingsLanguage),
           RadioGroup<Locale?>(
             groupValue: locale,
@@ -109,7 +110,12 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.s16,
+        AppSpacing.s16,
+        AppSpacing.s16,
+        AppSpacing.s8,
+      ),
       child: Text(
         title,
         style: context.textTheme.labelLarge?.copyWith(

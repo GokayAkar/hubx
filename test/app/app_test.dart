@@ -5,6 +5,7 @@ import 'package:hubx/app/app.dart';
 import 'package:hubx/app/di/app_dependencies.dart';
 import 'package:hubx/app/startup/app_startup_loader.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
+import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/onboarding/api/onboarding_api.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -26,6 +27,17 @@ void main() {
   const onboarded = {'onboarding.completed': true};
 
   setUp(DependencyProvider.reset);
+
+  /// Widget tests default to an 800x600 surface, which is no phone. Rendering
+  /// at the reference frame keeps the scale at 1 and lets an overflow that a
+  /// real device would show fail the test here.
+  setUp(() {
+    final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views
+        .first
+      ..devicePixelRatio = 1
+      ..physicalSize = kDesignSize;
+    addTearDown(view.reset);
+  });
 
   testWidgets('opens onboarding on a fresh install', (tester) async {
     await tester.pumpWidget(await bootstrap());

@@ -17,6 +17,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
+  flutter_screenutil: ^5.9.3
   get_it: ^9.2.1
   intl: any
   json_annotation: ^4.12.0
