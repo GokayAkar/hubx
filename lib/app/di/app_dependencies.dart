@@ -6,6 +6,8 @@ import 'package:hubx/core/storage/impl/key_value_storage_impl.dart';
 import 'package:hubx/features/home/ui/home_ui.dart';
 import 'package:hubx/features/onboarding/impl/onboarding_impl.dart';
 import 'package:hubx/features/onboarding/ui/onboarding_ui.dart';
+import 'package:hubx/features/paywall/impl/paywall_impl.dart';
+import 'package:hubx/features/paywall/ui/paywall_ui.dart';
 import 'package:hubx/features/settings/impl/settings_impl.dart';
 
 /// Composition root: the one place that knows implementations exist.
@@ -49,6 +51,8 @@ abstract final class AppDependencies {
     registerSettingsDomain();
     registerOnboardingDomain();
     registerOnboardingUi();
+    registerPaywallDomain();
+    registerPaywallUi();
     registerHomeUi();
   }
 }

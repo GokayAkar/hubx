@@ -18,11 +18,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_screenutil: ^5.9.3
+  flutter_svg: ^2.3.0
   get_it: ^9.2.1
   intl: any
   json_annotation: ^4.12.0
   meta: ^1.17.0
   shared_preferences: ^2.5.5
+  skeletonizer: ^2.1.3
   smooth_page_indicator: ^3.0.0
 
 dev_dependencies:
@@ -44,6 +46,7 @@ flutter:
 
   # One folder per feature. Flutter does not recurse, so each has its own line.
   assets:
+    - assets/icons/
     - assets/images/home/
     - assets/images/onboarding/
     - assets/images/paywall/
@@ -69,4 +72,4 @@ flutter:
 flutter_gen:
   output: lib/gen/
   integrations:
-    flutter_svg: false
+    flutter_svg: true

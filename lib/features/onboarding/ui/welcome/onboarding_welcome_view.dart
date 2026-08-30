@@ -10,7 +10,6 @@ import 'package:hubx/core/ui/emphasised_text.dart';
 import 'package:hubx/features/onboarding/api/onboarding_routes.dart';
 import 'package:hubx/gen/assets.gen.dart';
 
-
 /// The first screen: what the app is, and one way in.
 ///
 /// No step indicator here — the design starts counting from the screen after

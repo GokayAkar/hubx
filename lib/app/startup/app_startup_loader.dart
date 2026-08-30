@@ -46,14 +46,16 @@ abstract final class AppStartupLoader {
       status: UserStatus(isOnboardingCompleted: isOnboardingCompleted),
     );
 
-    DependencyProvider.getOrNull<Logger>()?.withSource(_source).debug(
-      'Startup loaded',
-      context: {
-        'themeMode': themeMode.name,
-        'locale': locale?.languageCode,
-        'onboardingCompleted': isOnboardingCompleted,
-      },
-    );
+    DependencyProvider.getOrNull<Logger>()
+        ?.withSource(_source)
+        .debug(
+          'Startup loaded',
+          context: {
+            'themeMode': themeMode.name,
+            'locale': locale?.languageCode,
+            'onboardingCompleted': isOnboardingCompleted,
+          },
+        );
 
     return startup;
   }

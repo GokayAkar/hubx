@@ -83,8 +83,11 @@ void main() {
       await pump(tester, 'Take a photo to **identify** the plant!');
       final normal = tester.widget<_Underline>(find.byType(_Underline)).width;
 
-      await pump(tester, 'Take a photo to **identify** the plant!',
-          textScale: 1.5);
+      await pump(
+        tester,
+        'Take a photo to **identify** the plant!',
+        textScale: 1.5,
+      );
       final larger = tester.widget<_Underline>(find.byType(_Underline)).width;
 
       // The stroke is measured, not padded, so it grows with the word.

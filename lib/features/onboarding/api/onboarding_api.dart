@@ -1,2 +1,2 @@
-export 'onboarding_repository.dart';
 export 'onboarding_routes.dart';
+export 'repositories/onboarding_repository.dart';

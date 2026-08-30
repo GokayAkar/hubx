@@ -40,6 +40,70 @@
   "@homeIncrement": {
     "description": "Screen reader label for the button that raises the count"
   },
+  "paywallTitle": "**PlantApp** Premium",
+  "@paywallTitle": {
+    "description": "Text between ** is the emphasised half"
+  },
+  "paywallSubtitle": "Access All Features",
+  "@paywallSubtitle": {},
+  "paywallFeatureUnlimitedTitle": "Unlimited",
+  "@paywallFeatureUnlimitedTitle": {},
+  "paywallFeatureUnlimitedBody": "Plant Identify",
+  "@paywallFeatureUnlimitedBody": {},
+  "paywallFeatureFasterTitle": "Faster",
+  "@paywallFeatureFasterTitle": {},
+  "paywallFeatureFasterBody": "Process",
+  "@paywallFeatureFasterBody": {},
+  "paywallPeriodMonth": "1 Month",
+  "@paywallPeriodMonth": {},
+  "paywallPeriodYear": "1 Year",
+  "@paywallPeriodYear": {},
+  "paywallMonthlyDetail": "{price}/month, auto renewable",
+  "@paywallMonthlyDetail": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "paywallYearlyDetail": "First {days} days free, then {price}/year",
+  "@paywallYearlyDetail": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "price": { "type": "String" }
+    }
+  },
+  "paywallSave": "Save {percent}%",
+  "@paywallSave": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "paywallTrialCta": "Try free for {days} days",
+  "@paywallTrialCta": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "paywallSubscribeCta": "Subscribe",
+  "@paywallSubscribeCta": {},
+  "paywallTrialTerms": "After the {days}-day free trial period you\u2019ll be charged {price} per year unless you cancel before the trial expires. Yearly Subscription is Auto-Renewable",
+  "@paywallTrialTerms": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "price": { "type": "String" }
+    }
+  },
+  "paywallRecurringTerms": "{price} per month, auto-renewable until you cancel.",
+  "@paywallRecurringTerms": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "paywallTerms": "Terms",
+  "@paywallTerms": {},
+  "paywallPrivacy": "Privacy",
+  "@paywallPrivacy": {},
+  "paywallRestore": "Restore",
+  "@paywallRestore": {},
+  "paywallLoadFailedTitle": "We couldn't load the plans",
+  "@paywallLoadFailedTitle": {},
+  "paywallLoadFailedBody": "Check your connection and try again.",
+  "@paywallLoadFailedBody": {},
+  "retry": "Try again",
+  "@retry": {},
+  "loading": "Loading",
+  "@loading": {},
   "settingsTitle": "Settings",
   "@settingsTitle": {},
   "settingsAppearance": "Appearance",

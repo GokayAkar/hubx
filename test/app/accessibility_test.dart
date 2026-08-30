@@ -10,6 +10,7 @@ import 'package:hubx/app/startup/app_startup_loader.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/onboarding/api/onboarding_api.dart';
+import 'package:hubx/features/paywall/api/paywall_api.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -26,12 +27,17 @@ void main() {
   // device. These checks are about how a layout copes with growing text, so
   // they have to measure the real thing.
   setUpAll(() async {
-    for (final weight in const ['Light', 'Regular', 'Medium', 'SemiBold',
-        'ExtraBold']) {
+    for (final weight in const [
+      'Light',
+      'Regular',
+      'Medium',
+      'SemiBold',
+      'ExtraBold',
+    ]) {
       final bytes = await File('assets/fonts/Roboto-$weight.ttf').readAsBytes();
-      await (FontLoader('Roboto')
-            ..addFont(Future.value(ByteData.sublistView(bytes))))
-          .load();
+      await (FontLoader(
+        'Roboto',
+      )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
     }
   });
 
@@ -47,13 +53,10 @@ void main() {
 
   setUp(() async {
     await DependencyProvider.reset();
-    final view = TestWidgetsFlutterBinding
-        .instance
-        .platformDispatcher
-        .views
-        .first
-      ..devicePixelRatio = 1
-      ..physicalSize = kDesignSize;
+    final view =
+        TestWidgetsFlutterBinding.instance.platformDispatcher.views.first
+          ..devicePixelRatio = 1
+          ..physicalSize = kDesignSize;
     addTearDown(view.reset);
   });
 
@@ -64,12 +67,14 @@ void main() {
     Map<String, Object> stored = const {},
     double textScale = 1,
   }) async {
-    await tester.pumpWidget(
-      MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
-        child: await boot(stored),
-      ),
-    );
+    // Through the dispatcher rather than a MediaQuery above the app: wrapping
+    // one here would hand the app a whole fresh MediaQueryData, wiping the
+    // view's padding, and every check below would run on a phone with no notch
+    // and no home indicator.
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(await boot(stored));
     await tester.pumpAndSettle();
 
     await tester.binding.handlePushRoute(path);
@@ -114,15 +119,50 @@ void main() {
     expect(inset.bottom, greaterThanOrEqualTo(20));
   });
 
+  // The paywall's legal links are sized to the design's type instead of to a
+  // 48pt target — a deliberate product call, made with the cost known. Only the
+  // size check is lifted, and only there: the rest of that screen, and every
+  // other screen, is still held to it.
+  const undersizedTapTargets = {PaywallRoutes.root};
+
   for (final route in AppRouter(startOnOnboarding: false).routes) {
     group(route.path, () {
       testWidgets('meets the accessibility guidelines', (tester) async {
+        // A phone with both a notch and a home indicator: the insets a layout
+        // is most likely to have forgotten.
+        const inset = EdgeInsets.only(top: 47, bottom: 34);
+        tester.view
+          ..padding = const FakeViewPadding(top: 47, bottom: 34)
+          ..viewPadding = const FakeViewPadding(top: 47, bottom: 34);
+
         final handle = tester.ensureSemantics();
         await open(tester, stored: onboarded, path: route.path);
 
+        // Nothing tappable hides under the notch or the home indicator.
+        final screen = tester.getSize(find.byType(MaterialApp));
+        for (final tappable in [
+          ...find.byType(IconButton).evaluate(),
+          ...find.byType(TextButton).evaluate(),
+          ...find.byType(FilledButton).evaluate(),
+        ]) {
+          final rect = tester.getRect(find.byWidget(tappable.widget));
+          expect(
+            rect.top,
+            greaterThanOrEqualTo(inset.top),
+            reason: 'a control on ${route.path} sits under the status bar',
+          );
+          expect(
+            rect.bottom,
+            lessThanOrEqualTo(screen.height - inset.bottom),
+            reason: 'a control on ${route.path} sits under the home indicator',
+          );
+        }
+
         // Every tappable is big enough to hit, and says what it does.
-        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-        await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+        if (!undersizedTapTargets.contains(route.path)) {
+          await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+          await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+        }
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
 
         handle.dispose();

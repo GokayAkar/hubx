@@ -16,6 +16,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.primary,
     required this.onPrimary,
     required this.surface,
+    required this.surfaceRaised,
+    required this.divider,
     required this.textPrimary,
     required this.textSecondary,
     required this.textTertiary,
@@ -29,6 +31,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     primary: Color(0xFF28AF6E),
     onPrimary: Color(0xFFFFFFFF),
     surface: Color(0xFFFFFFFF),
+    surfaceRaised: Color(0xFFF4F7F5),
+    divider: Color(0x1A13231B),
     textPrimary: Color(0xFF13231B),
     textSecondary: Color(0xB213231B),
     textTertiary: Color(0xB2597165),
@@ -43,6 +47,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     primary: Color(0xFF28AF6E),
     onPrimary: Color(0xFFFFFFFF),
     surface: Color(0xFF101E17),
+    surfaceRaised: Color(0xFF1C2B23),
+    divider: Color(0x33F2F7F4),
     textPrimary: Color(0xFFF2F7F4),
     textSecondary: Color(0xB2F2F7F4),
     textTertiary: Color(0xB2A8BDB1),
@@ -57,6 +63,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color onPrimary;
 
   final Color surface;
+
+  /// A panel sitting on [surface] — the feature cards, the plan tiles.
+  final Color surfaceRaised;
+
+  /// Hairlines and the resting state of a control's outline.
+  final Color divider;
 
   final Color textPrimary;
   final Color textSecondary;
@@ -73,6 +85,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? primary,
     Color? onPrimary,
     Color? surface,
+    Color? surfaceRaised,
+    Color? divider,
     Color? textPrimary,
     Color? textSecondary,
     Color? textTertiary,
@@ -84,6 +98,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       primary: primary ?? this.primary,
       onPrimary: onPrimary ?? this.onPrimary,
       surface: surface ?? this.surface,
+      surfaceRaised: surfaceRaised ?? this.surfaceRaised,
+      divider: divider ?? this.divider,
       textPrimary: textPrimary ?? this.textPrimary,
       textSecondary: textSecondary ?? this.textSecondary,
       textTertiary: textTertiary ?? this.textTertiary,
@@ -102,6 +118,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       primary: Color.lerp(primary, other.primary, t)!,
       onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
+      surfaceRaised: Color.lerp(surfaceRaised, other.surfaceRaised, t)!,
+      divider: Color.lerp(divider, other.divider, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textTertiary: Color.lerp(textTertiary, other.textTertiary, t)!,

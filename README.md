@@ -21,7 +21,10 @@ of the app**:
 
 ```
 lib/features/<name>/
-  api/    contracts: repository interface, route path constants, models
+  api/    <name>_api.dart    -> barrel
+          <name>_routes.dart -> the paths other features navigate to
+          models/            -> the feature's own types
+          repositories/      -> the contracts its impl fulfils
   impl/   <name>_impl.dart -> library; register<Name>Domain() is its only
                               public member
           src/*.dart       -> part files; classes are prefixed with _
@@ -295,6 +298,8 @@ scaling itself at 320, 360 and 430.
 One folder per feature, so a screen's images sit next to nothing else:
 
 ```
+assets/icons/                   home, garden, healthcare,
+                                profile, identify, speedometer
 assets/images/
   home/search_background.webp   1080x525
   onboarding/welcome.webp       1080x1454
@@ -321,7 +326,26 @@ frame". A full-width image on the largest phone needs about 1080 physical
 pixels; something shown at 100 pt needs 300, and shipping 1080 for it is
 waste.
 
-**WebP.** Flutter decodes it natively on both platforms, alpha included.
+**Icons are SVG, images are WebP.** The rule is what the artwork is, not what
+it is for: a flat shape compresses to a few hundred bytes as a vector and stays
+sharp at any size, while a photograph traced into paths does neither — the
+onboarding plant is 4.6 MB as SVG against 552 KB as WebP.
+
+Icons are tinted where they are used, never where they are drawn:
+
+```dart
+Assets.icons.home.svg(
+  width: AppSize.icon24,
+  colorFilter: ColorFilter.mode(context.palette.primary, BlendMode.srcIn),
+)
+```
+
+`srcIn` replaces the colour and keeps the alpha, so one file serves the resting
+and the active state and both themes — and a two-tone icon keeps its second
+tone, since that tone is opacity rather than a different colour.
+
+**WebP.** Flutter decodes photographs natively on both platforms, alpha
+included.
 
 Pick the quality by measuring rather than by habit: `cwebp -print_psnr` reports
 the distortion, and **42 dB is the usual visually-lossless threshold**. Sweep
@@ -348,8 +372,13 @@ nothing useful or repeats what the text beside it already said.
 
 ### Onboarding
 
-One folder per screen — `ui/welcome/` and `ui/steps/` — rather than one folder
-per kind. Grouping by kind (`view/`, `widgets/`, `bloc/`) puts a screen's parts
+`api/` groups by kind because that is what grows: a feature gains models and
+repositories over time, but exactly one routes file, ever — so that one stays
+flat, where it is shortest to import from. A folder appears when it has
+something in it; `home/api/` has only routes and needs neither.
+
+`ui/` groups the other way. One folder per screen — `ui/welcome/` and
+`ui/steps/` — rather than one folder per kind. Grouping by kind (`view/`, `widgets/`, `bloc/`) puts a screen's parts
 in three places and hides which of them belong together; grouping by screen
 means everything a screen needs is in one folder, and deleting the screen
 deletes the folder. There is no `shared/`: nothing is shared yet, and a folder

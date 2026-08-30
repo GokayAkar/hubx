@@ -48,6 +48,8 @@ abstract final class AppRadius {
 
   static double get r12 => 12.w;
 
+  static double get r14 => 14.w;
+
   static double get r16 => 16.w;
 
   static double get r24 => 24.w;

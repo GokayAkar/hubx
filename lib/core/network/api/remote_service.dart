@@ -37,9 +37,7 @@ typedef JsonParser<T> = T Function(Json json);
 /// multipart — are added here as they are needed, rather than by reaching
 /// around the class.
 abstract class RemoteService {
-  const RemoteService(Dio dio, Logger logger)
-    : _dio = dio,
-      _logger = logger;
+  const RemoteService(Dio dio, Logger logger) : _dio = dio, _logger = logger;
 
   /// Private on purpose: every call goes through the verbs below, so no
   /// service can skip the error translation by awaiting Dio itself.

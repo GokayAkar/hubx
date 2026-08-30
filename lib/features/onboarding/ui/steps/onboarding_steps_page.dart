@@ -13,7 +13,6 @@ import 'package:hubx/features/paywall/api/paywall_api.dart';
 import 'package:hubx/gen/assets.gen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-
 @RoutePage()
 class OnboardingStepsPage extends StatelessWidget {
   const OnboardingStepsPage({super.key});

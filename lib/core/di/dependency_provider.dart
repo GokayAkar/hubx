@@ -44,6 +44,24 @@ abstract final class DependencyProvider {
     _di.registerFactory<T>(factory, instanceName: instanceName);
   }
 
+  /// Puts [instance] in place of whatever is registered for [T].
+  ///
+  /// For tests: it is how a fake stands in for the real thing after the app
+  /// has already wired itself up, which is the only way to reach a path — a
+  /// failing request, an empty response — that the real implementation never
+  /// takes.
+  @visibleForTesting
+  static void override<T extends Object>(T instance, {String? instanceName}) {
+    _di.allowReassignment = true;
+    try {
+      _di.registerSingleton<T>(instance, instanceName: instanceName);
+    } finally {
+      // Back off immediately: a duplicate registration in the app itself is a
+      // mistake, and this must not be what hides it.
+      _di.allowReassignment = false;
+    }
+  }
+
   @visibleForTesting
   static Future<void> reset() => _di.reset();
 }

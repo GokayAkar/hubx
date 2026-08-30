@@ -42,10 +42,10 @@ void main() {
   /// at the reference frame keeps the scale at 1 and lets an overflow that a
   /// real device would show fail the test here.
   setUp(() {
-    final view = TestWidgetsFlutterBinding.instance.platformDispatcher.views
-        .first
-      ..devicePixelRatio = 1
-      ..physicalSize = kDesignSize;
+    final view =
+        TestWidgetsFlutterBinding.instance.platformDispatcher.views.first
+          ..devicePixelRatio = 1
+          ..physicalSize = kDesignSize;
     addTearDown(view.reset);
   });
 
