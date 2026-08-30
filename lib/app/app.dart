@@ -14,7 +14,6 @@ import 'package:hubx/features/settings/api/settings_api.dart';
 import 'package:hubx/features/settings/ui/settings_ui.dart';
 import 'package:hubx/l10n/generated/app_localizations.dart';
 
-
 class App extends StatefulWidget {
   const App({required this.startup, super.key});
 

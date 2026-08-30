@@ -32,17 +32,14 @@ class OnboardingWelcomeView extends StatelessWidget {
     return Scaffold(
       body: DecoratedBox(
         decoration: decoration,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: AppSpacing.s24),
               const _Title(),
               const _Subtitle(),
-              // The picture takes whatever the copy leaves: it shrinks on a
-              // small phone and grows on a large one, and the page never
-              // scrolls.
+              SizedBox(height: AppSpacing.s24),
               Expanded(
                 child: Assets.images.onboarding.welcome.image(
                   fit: BoxFit.contain,
@@ -65,13 +62,16 @@ class _Cta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () => unawaited(
-        context.router.replacePath(OnboardingRoutes.steps),
-      ),
-      child: Text(
-        context.l10n.onboardingWelcomeAction,
-        style: AppTextStyles.semiBold16,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      child: FilledButton(
+        onPressed: () => unawaited(
+          context.router.replacePath(OnboardingRoutes.steps),
+        ),
+        child: Text(
+          context.l10n.onboardingWelcomeAction,
+          style: AppTextStyles.semiBold16,
+        ),
       ),
     );
   }
@@ -82,10 +82,13 @@ class _Subtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      context.l10n.onboardingWelcomeBody,
-      style: AppTextStyles.regular16.copyWith(
-        color: AppColors.textSecondary,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      child: Text(
+        context.l10n.onboardingWelcomeBody,
+        style: AppTextStyles.regular16.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
@@ -96,13 +99,16 @@ class _Title extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmphasisedText(
-      context.l10n.onboardingWelcomeTitle,
-      style: AppTextStyles.light28.copyWith(
-        color: AppColors.textPrimary,
-      ),
-      emphasisStyle: AppTextStyles.semiBold28.copyWith(
-        color: AppColors.textPrimary,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      child: EmphasisedText(
+        context.l10n.onboardingWelcomeTitle,
+        style: AppTextStyles.light28.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        emphasisStyle: AppTextStyles.semiBold28.copyWith(
+          color: AppColors.textPrimary,
+        ),
       ),
     );
   }

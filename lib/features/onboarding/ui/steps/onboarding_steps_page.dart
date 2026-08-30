@@ -82,30 +82,32 @@ class _OnboardingStepsScreenState extends State<_OnboardingStepsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Only the pages move; everything below holds still.
-          Expanded(
-            child: PageView(
-              controller: _controller,
-              onPageChanged: (page) => setState(() => _page = page),
-              children: [
-                OnboardingStepView(
-                  title: context.l10n.onboardingScanTitle,
-                  image: Assets.images.onboarding.scan,
-                ),
-                OnboardingStepView(
-                  title: context.l10n.onboardingCareTitle,
-                  image: Assets.images.onboarding.detail,
-                ),
-              ],
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Only the pages move; everything below holds still.
+            Expanded(
+              child: PageView(
+                controller: _controller,
+                onPageChanged: (page) => setState(() => _page = page),
+                children: [
+                  OnboardingStepView(
+                    title: context.l10n.onboardingScanTitle,
+                    image: Assets.images.onboarding.scan,
+                  ),
+                  OnboardingStepView(
+                    title: context.l10n.onboardingCareTitle,
+                    image: Assets.images.onboarding.detail,
+                  ),
+                ],
+              ),
             ),
-          ),
-          _Cta(onPressed: widget.isSaving ? null : _next),
-          SizedBox(height: AppSpacing.s24),
-          _Indicator(page: _page),
-        ],
+            _Cta(onPressed: widget.isSaving ? null : _next),
+            SizedBox(height: AppSpacing.s24),
+            _Indicator(page: _page),
+          ],
+        ),
       ),
     );
   }
