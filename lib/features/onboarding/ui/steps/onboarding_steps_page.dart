@@ -6,13 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
-import 'package:hubx/core/theme/app_colors.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/features/onboarding/ui/steps/bloc/onboarding_bloc.dart';
 import 'package:hubx/features/onboarding/ui/steps/onboarding_step_view.dart';
 import 'package:hubx/features/paywall/api/paywall_api.dart';
 import 'package:hubx/gen/assets.gen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 
 @RoutePage()
 class OnboardingStepsPage extends StatelessWidget {
@@ -81,7 +81,7 @@ class _OnboardingStepsScreenState extends State<_OnboardingStepsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.palette.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,8 +138,8 @@ class _Indicator extends StatelessWidget {
             spacing: 4.w,
             scale: 10 / 6,
             radius: 6.w,
-            dotColor: AppColors.indicatorInactive,
-            activeDotColor: AppColors.indicatorActive,
+            dotColor: context.palette.indicatorInactive,
+            activeDotColor: context.palette.indicatorActive,
           ),
         ),
       ),

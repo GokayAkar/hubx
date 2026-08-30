@@ -381,6 +381,19 @@ landed, then stretches the brush to each box. That is what makes it survive a
 longer translation, a larger system text size, and a phrase that wrapped onto a
 second line — the cases where a fixed-width underline drifts off the words.
 
+### Colours
+
+The design's colours are a `ThemeExtension`,
+[AppPalette](lib/core/theme/app_palette.dart), read through `context.palette`.
+Not constants, because constants cannot follow the theme; not Material's
+`ColorScheme`, because several of them have no slot there — a two-stop
+gradient, three tiers of text, an indicator wash.
+
+`AppPalette.light` is the design. `AppPalette.dark` is **derived, not given**:
+every value in it still needs sign-off. Because it goes through `Theme`, a
+theme switch crossfades the colours rather than snapping them, and a test can
+replace the whole set without touching a widget.
+
 ### Typography
 
 The design has 25 text styles; Material's `TextTheme` has 15 slots, and seven

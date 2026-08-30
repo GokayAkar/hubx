@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:hubx/core/theme/app_colors.dart';
+import 'package:hubx/core/extensions/build_context_x.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/core/ui/app_icon_button.dart';
 import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/gen/assets.gen.dart';
+
 
 /// Scaffold for the paywall: the background and the way out are real, the
 /// offer is not built yet.
@@ -17,7 +18,7 @@ class PaywallPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.paywallSurface,
+      backgroundColor: context.palette.surface,
       body: Stack(
         fit: StackFit.expand,
         children: [

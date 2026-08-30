@@ -4,12 +4,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hubx/core/extensions/build_context_x.dart';
-import 'package:hubx/core/theme/app_colors.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/core/theme/app_text_styles.dart';
 import 'package:hubx/core/ui/emphasised_text.dart';
 import 'package:hubx/features/onboarding/api/onboarding_routes.dart';
 import 'package:hubx/gen/assets.gen.dart';
+
 
 /// The first screen: what the app is, and one way in.
 ///
@@ -22,11 +22,11 @@ class OnboardingWelcomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const decoration = BoxDecoration(
+    final decoration = BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
-        colors: AppColors.welcomeGradient,
+        colors: context.palette.welcomeGradient,
       ),
     );
     return Scaffold(
@@ -87,7 +87,7 @@ class _Subtitle extends StatelessWidget {
       child: Text(
         context.l10n.onboardingWelcomeBody,
         style: AppTextStyles.regular16.copyWith(
-          color: AppColors.textSecondary,
+          color: context.palette.textSecondary,
         ),
       ),
     );
@@ -104,10 +104,10 @@ class _Title extends StatelessWidget {
       child: EmphasisedText(
         context.l10n.onboardingWelcomeTitle,
         style: AppTextStyles.light28.copyWith(
-          color: AppColors.textPrimary,
+          color: context.palette.textPrimary,
         ),
         emphasisStyle: AppTextStyles.semiBold28.copyWith(
-          color: AppColors.textPrimary,
+          color: context.palette.textPrimary,
         ),
       ),
     );
@@ -139,7 +139,7 @@ class _LegalState extends State<_Legal> {
   @override
   Widget build(BuildContext context) {
     final base = AppTextStyles.regular11.copyWith(
-      color: AppColors.textTertiary,
+      color: context.palette.textTertiary,
     );
     final link = AppTextStyles.underlined(base);
 

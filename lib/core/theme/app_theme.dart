@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hubx/core/theme/app_colors.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
+import 'package:hubx/core/theme/app_palette.dart';
 import 'package:hubx/core/theme/app_text_styles.dart';
 
 /// Single source of truth for the light and dark [ThemeData] of the app.
@@ -13,6 +13,9 @@ abstract final class AppTheme {
   static ThemeData get dark => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
+    final palette = brightness == Brightness.light
+        ? AppPalette.light
+        : AppPalette.dark;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: brightness,
@@ -20,6 +23,10 @@ abstract final class AppTheme {
 
     return ThemeData(
       colorScheme: colorScheme,
+      // Reached with `context.palette`; the design's colours live here rather
+      // than as constants so they follow the theme.
+      extensions: [palette],
+      scaffoldBackgroundColor: palette.surface,
       useMaterial3: true,
       fontFamily: AppTextStyles.fontFamily,
       // Material's own widgets read from here, so the design's styles reach an
@@ -37,7 +44,6 @@ abstract final class AppTheme {
         labelMedium: AppTextStyles.regular12,
         labelSmall: AppTextStyles.regular11,
       ),
-      scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
@@ -47,8 +53,8 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: palette.primary,
+          foregroundColor: palette.onPrimary,
           textStyle: AppTextStyles.semiBold16,
           minimumSize: Size.fromHeight(AppSize.controlHeight),
           shape: RoundedRectangleBorder(

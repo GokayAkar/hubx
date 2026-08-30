@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hubx/core/theme/app_colors.dart';
+import 'package:hubx/core/extensions/build_context_x.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/core/theme/app_text_styles.dart';
 import 'package:hubx/core/ui/emphasised_text.dart';
@@ -51,11 +51,11 @@ class _Title extends StatelessWidget {
       child: EmphasisedText(
         title,
         style: AppTextStyles.medium28.copyWith(
-          color: AppColors.textPrimary,
+          color: context.palette.textPrimary,
           letterSpacing: -1,
         ),
         emphasisStyle: AppTextStyles.extraBold28.copyWith(
-          color: AppColors.textPrimary,
+          color: context.palette.textPrimary,
           letterSpacing: -1,
         ),
         // Stretched to the measured width of the emphasised words, so the
@@ -64,6 +64,11 @@ class _Title extends StatelessWidget {
           width: width,
           fit: BoxFit.fill,
           height: 8.h,
+          // The stroke is one colour over transparency, so it works as a mask:
+          // `srcIn` keeps its shape and takes the heading's colour, which is
+          // what stops it disappearing on a dark background.
+          color: context.palette.textPrimary,
+          colorBlendMode: BlendMode.srcIn,
         ),
         underlineOvershoot: 0.2,
       ),
