@@ -7,6 +7,7 @@ sealed class HomeEvent extends Equatable {
   List<Object?> get props => const [];
 }
 
-final class HomeTapped extends HomeEvent {
-  const HomeTapped();
+/// Asks for the promoted articles. Sent again to retry a failed load.
+final class HomeStarted extends HomeEvent {
+  const HomeStarted();
 }

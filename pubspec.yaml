@@ -9,6 +9,7 @@ environment:
 dependencies:
   auto_route: ^11.1.0
   bloc: ^9.2.1
+  cached_network_image: ^3.4.1
   dio: ^5.11.0
   dio_smart_retry: ^7.0.1
   equatable: ^2.1.0
@@ -20,6 +21,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.3.0
   get_it: ^9.2.1
+  infinite_scroll_pagination: ^5.1.1
   intl: any
   json_annotation: ^4.12.0
   meta: ^1.17.0

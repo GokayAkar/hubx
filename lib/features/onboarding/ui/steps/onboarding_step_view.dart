@@ -21,18 +21,48 @@ class OnboardingStepView extends StatelessWidget {
   final String title;
   final AssetGenImage image;
 
+  /// How much of the screen the artwork takes, measured from the layout this
+  /// replaced.
+  static const _artworkShare = 0.698;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(height: AppSpacing.s24),
-        _Title(title: title),
-        SizedBox(height: AppSpacing.s32),
-        Expanded(
-          child: image.image(fit: BoxFit.contain, excludeFromSemantics: true),
+    // Fills the device and does not scroll at any ordinary text size: the
+    // minimum height makes the column as tall as the viewport, so there is
+    // nothing to scroll to. At the accessibility sizes, where the title alone
+    // can be taller than the screen, it becomes a scroll rather than clipping
+    // the artwork away.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: AppSpacing.s24),
+                  _Title(title: title),
+                ],
+              ),
+              // A share of the screen rather than whatever is left over:
+              // leftovers need a bounded height, which a scroll view does not
+              // give. The figure is what the old layout measured at, so the
+              // artwork is the size it always was.
+              SizedBox(
+                height: constraints.maxHeight * _artworkShare,
+                child: image.image(
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }

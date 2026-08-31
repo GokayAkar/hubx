@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:hubx/core/logging/api/logging_api.dart';
 import 'package:hubx/core/network/api/api_exception.dart';
@@ -159,7 +161,7 @@ abstract class RemoteService {
     }
 
     try {
-      return parse(response.data);
+      return parse(_decoded(response.data));
     } on Object catch (error, stackTrace) {
       throw _report(
         ApiParsingException(
@@ -169,6 +171,27 @@ abstract class RemoteService {
           stackTrace: stackTrace,
         ),
       );
+    }
+  }
+
+  /// The body, decoded.
+  ///
+  /// Dio decides whether to decode from the response's content type, and not
+  /// every server labels its JSON correctly — this one calls it text/html,
+  /// so what arrives is a string containing JSON rather than a map. Undoing
+  /// that here keeps the workaround in one place instead of in every parser,
+  /// and a correctly labelled response arrives decoded already and passes
+  /// straight through.
+  ///
+  /// A body that really is text stays text: only something that parses as
+  /// JSON is replaced.
+  Json _decoded(Json data) {
+    if (data is! String || data.isEmpty) return data;
+
+    try {
+      return jsonDecode(data);
+    } on FormatException {
+      return data;
     }
   }
 

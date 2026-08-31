@@ -3,7 +3,6 @@ import 'package:hubx/app/router/app_router.gr.dart';
 import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/onboarding/api/onboarding_api.dart';
 import 'package:hubx/features/paywall/api/paywall_api.dart';
-import 'package:hubx/features/settings/api/settings_api.dart';
 
 /// Maps the paths published by each feature's `api` to that feature's pages.
 ///
@@ -22,10 +21,17 @@ class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
     AutoRoute(
-      page: HomeRoute.page,
+      page: MainShellRoute.page,
       path: HomeRoutes.root,
       initial: !startOnOnboarding,
+      children: [
+        AutoRoute(page: HomeRoute.page, path: '', initial: true),
+        AutoRoute(page: DiagnoseRoute.page, path: 'diagnose'),
+        AutoRoute(page: GardenRoute.page, path: 'garden'),
+        AutoRoute(page: SettingsRoute.page, path: 'profile'),
+      ],
     ),
+    AutoRoute(page: ContentDetailRoute.page, path: HomeRoutes.detail),
     AutoRoute(
       page: OnboardingWelcomeRoute.page,
       path: OnboardingRoutes.root,
@@ -33,6 +39,5 @@ class AppRouter extends RootStackRouter {
     ),
     AutoRoute(page: OnboardingStepsRoute.page, path: OnboardingRoutes.steps),
     AutoRoute(page: PaywallRoute.page, path: PaywallRoutes.root),
-    AutoRoute(page: SettingsRoute.page, path: SettingsRoutes.root),
   ];
 }

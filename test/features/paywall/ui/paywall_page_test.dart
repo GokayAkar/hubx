@@ -10,12 +10,16 @@ import 'package:hubx/app/startup/app_startup_loader.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/core/ui/emphasised_text.dart';
+import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/paywall/api/paywall_api.dart';
+import 'package:hubx/features/paywall/ui/paywall_ui.dart';
 import 'package:hubx/features/paywall/ui/widgets/paywall_feature_cards.dart';
 import 'package:hubx/features/paywall/ui/widgets/paywall_plan_tile.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+import '../../../support/fake_home_repository.dart';
 
 void main() {
   setUpAll(() async {
@@ -48,6 +52,8 @@ void main() {
           'onboarding.completed': true,
         });
     AppDependencies.register();
+    // The home page sits under the paywall in the shell and fetches on sight.
+    DependencyProvider.override<HomeRepository>(FakeHomeRepository());
 
     await tester.pumpWidget(App(startup: await AppStartupLoader.load()));
     await tester.pumpAndSettle();
@@ -68,6 +74,7 @@ void main() {
         InMemorySharedPreferencesAsync.withData({'onboarding.completed': true});
     AppDependencies.register();
     DependencyProvider.override<PaywallRepository>(repository);
+    DependencyProvider.override<HomeRepository>(FakeHomeRepository());
 
     await tester.pumpWidget(App(startup: await AppStartupLoader.load()));
     await tester.pumpAndSettle();
@@ -152,8 +159,14 @@ void main() {
       expect(find.text("We couldn't load the plans"), findsOneWidget);
       expect(find.text('1 Month'), findsNothing);
 
-      // The second attempt succeeds, and the page is the page again.
-      await tester.tap(find.text('Try again'));
+      // Scoped to this screen: the home page sits under it in the shell and
+      // offers a retry of its own when its requests fail.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(PaywallPage),
+          matching: find.text('Try again'),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(repository.calls, 2);

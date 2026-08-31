@@ -94,9 +94,6 @@ class _Card extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _Icon(feature.icon),
-                // No Spacer: the card lives in a vertical scroll, so its
-                // height is what its content makes it. This gap is what takes
-                // the content to the design's 124.
                 SizedBox(height: AppSpacing.s8),
                 Text(
                   feature.title,

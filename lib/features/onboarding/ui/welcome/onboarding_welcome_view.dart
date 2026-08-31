@@ -19,6 +19,9 @@ class OnboardingWelcomeView extends StatelessWidget {
     super.key,
   });
 
+  /// How much of the screen the plant takes.
+  static const _artworkShare = 0.46;
+
   @override
   Widget build(BuildContext context) {
     final decoration = BoxDecoration(
@@ -32,23 +35,53 @@ class OnboardingWelcomeView extends StatelessWidget {
       body: DecoratedBox(
         decoration: decoration,
         child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: AppSpacing.s24),
-              const _Title(),
-              const _Subtitle(),
-              SizedBox(height: AppSpacing.s24),
-              Expanded(
-                child: Assets.images.onboarding.welcome.image(
-                  fit: BoxFit.contain,
-                  excludeFromSemantics: true,
+          // The screen is meant to fill the device and not scroll, and at any
+          // ordinary text size it does exactly that: the minimum height makes
+          // the column as tall as the viewport, so there is nothing to scroll
+          // to. It is only at the accessibility text sizes, where the words
+          // alone are taller than the screen, that this becomes a scroll —
+          // which beats the alternative of clipping the button off the bottom.
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: AppSpacing.s24),
+                        const _Title(),
+                        const _Subtitle(),
+                      ],
+                    ),
+                    // A share of the screen rather than whatever is left over:
+                    // leftovers need a bounded height, which a scroll view
+                    // does not give, and a share still grows on a big device
+                    // and shrinks on a small one.
+                    SizedBox(
+                      height: constraints.maxHeight * _artworkShare,
+                      child: Assets.images.onboarding.welcome.image(
+                        fit: BoxFit.contain,
+                        excludeFromSemantics: true,
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _Cta(),
+                        SizedBox(height: AppSpacing.s12),
+                        _Legal(onOpenTerms: () {}, onOpenPrivacy: () {}),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const _Cta(),
-              SizedBox(height: AppSpacing.s12),
-              _Legal(onOpenTerms: () {}, onOpenPrivacy: () {}),
-            ],
+            ),
           ),
         ),
       ),

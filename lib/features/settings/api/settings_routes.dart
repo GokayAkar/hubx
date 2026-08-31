@@ -2,5 +2,5 @@
 ///
 /// Usage: `context.router.pushPath(SettingsRoutes.root)`.
 abstract final class SettingsRoutes {
-  static const root = '/settings';
+  static const root = '/home/profile';
 }

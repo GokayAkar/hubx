@@ -3,6 +3,7 @@ import 'package:hubx/core/logging/api/logging_api.dart';
 import 'package:hubx/core/logging/impl/logging_impl.dart';
 import 'package:hubx/core/network/impl/network_impl.dart';
 import 'package:hubx/core/storage/impl/key_value_storage_impl.dart';
+import 'package:hubx/features/home/impl/home_impl.dart';
 import 'package:hubx/features/home/ui/home_ui.dart';
 import 'package:hubx/features/onboarding/impl/onboarding_impl.dart';
 import 'package:hubx/features/onboarding/ui/onboarding_ui.dart';
@@ -53,6 +54,7 @@ abstract final class AppDependencies {
     registerOnboardingUi();
     registerPaywallDomain();
     registerPaywallUi();
+    registerHomeDomain();
     registerHomeUi();
   }
 }

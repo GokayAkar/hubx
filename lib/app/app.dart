@@ -25,15 +25,10 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  /// Created once, from the startup snapshot: which screen the app opens on is
-  /// a launch-time decision, so it is baked into the router instead of being
-  /// re-evaluated on every incoming link.
   late final AppRouter _appRouter = AppRouter(
     startOnOnboarding: !widget.startup.status.isOnboardingCompleted,
   );
 
-  /// Built once: a new config on every rebuild would cancel an in-flight route
-  /// parse, silently dropping a deep link that arrives during a theme change.
   late final RouterConfig<UrlState> _routerConfig = _appRouter.config();
 
   /// Guarantees a minimum gap at the bottom of every screen.
@@ -47,11 +42,13 @@ class _AppState extends State<App> {
     final media = MediaQuery.of(context);
     final bottom = math.max(media.padding.bottom, AppSpacing.s24);
 
+    // Only `padding`, which is what SafeArea and scroll views read. Not
+    // `viewPadding`: that is a statement about what the system is covering,
+    // and this minimum is a decision about how the design should breathe.
+    // Leaving it truthful is what lets a bar pinned to the very bottom find
+    // out how much of the edge really belongs to the system.
     return MediaQuery(
-      data: media.copyWith(
-        padding: media.padding.copyWith(bottom: bottom),
-        viewPadding: media.viewPadding.copyWith(bottom: bottom),
-      ),
+      data: media.copyWith(padding: media.padding.copyWith(bottom: bottom)),
       child: child ?? const SizedBox.shrink(),
     );
   }

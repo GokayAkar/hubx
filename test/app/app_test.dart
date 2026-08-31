@@ -6,10 +6,13 @@ import 'package:hubx/app/di/app_dependencies.dart';
 import 'package:hubx/app/startup/app_startup_loader.dart';
 import 'package:hubx/core/di/dependency_provider.dart';
 import 'package:hubx/core/theme/app_dimensions.dart';
+import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/onboarding/api/onboarding_api.dart';
 import 'package:hubx/features/settings/api/settings_api.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+
+import '../support/fake_home_repository.dart';
 
 void main() {
   /// Mirrors `main()`: seed the store, register, load the startup snapshot and
@@ -20,6 +23,9 @@ void main() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.withData(storedPreferences);
     AppDependencies.register();
+    // The home page is the first tab and starts fetching the moment the app
+    // appears. Stubbed so no suite here needs a network connection to pass.
+    DependencyProvider.override<HomeRepository>(FakeHomeRepository());
 
     return App(startup: await AppStartupLoader.load());
   }
@@ -138,7 +144,8 @@ void main() {
     await tester.pumpWidget(await bootstrap(onboarded));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    // Settings is the Profile tab now, not a button in an app bar.
+    await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
     expect(find.text('Settings'), findsOneWidget);
 

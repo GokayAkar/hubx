@@ -31,7 +31,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     primary: Color(0xFF28AF6E),
     onPrimary: Color(0xFFFFFFFF),
     surface: Color(0xFFFFFFFF),
-    surfaceRaised: Color(0xFFF4F7F5),
+    surfaceRaised: Color(0xFFF4F6F6),
     divider: Color(0x1A13231B),
     textPrimary: Color(0xFF13231B),
     textSecondary: Color(0xB213231B),

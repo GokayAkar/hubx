@@ -97,14 +97,19 @@ class _Radio extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    return RadioGroup(
-      groupValue: isSelected,
-      onChanged: (_) {},
-      child: Radio.adaptive(
-        value: true,
-        activeColor: palette.primary,
-        enabled: isSelected,
-        innerRadius: WidgetStateProperty.all(12.w),
+    // Hidden from a screen reader: the whole tile is the control and already
+    // announces itself as one of a group and whether it is chosen. Left
+    // visible, this adds a second tappable node with nothing to call it.
+    return ExcludeSemantics(
+      child: RadioGroup(
+        groupValue: isSelected,
+        onChanged: (_) {},
+        child: Radio.adaptive(
+          value: true,
+          activeColor: palette.primary,
+          enabled: isSelected,
+          innerRadius: WidgetStateProperty.all(12.w),
+        ),
       ),
     );
   }

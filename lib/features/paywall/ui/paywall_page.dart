@@ -10,6 +10,7 @@ import 'package:hubx/core/theme/app_dimensions.dart';
 import 'package:hubx/core/theme/app_text_styles.dart';
 import 'package:hubx/core/theme/app_theme.dart';
 import 'package:hubx/core/ui/app_icon_button.dart';
+import 'package:hubx/core/ui/app_skeleton.dart';
 import 'package:hubx/core/ui/emphasised_text.dart';
 import 'package:hubx/features/home/api/home_api.dart';
 import 'package:hubx/features/paywall/api/paywall_api.dart';
@@ -17,7 +18,6 @@ import 'package:hubx/features/paywall/ui/bloc/paywall_bloc.dart';
 import 'package:hubx/features/paywall/ui/widgets/paywall_feature_cards.dart';
 import 'package:hubx/features/paywall/ui/widgets/paywall_plan_tile.dart';
 import 'package:hubx/gen/assets.gen.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 @RoutePage()
 class PaywallPage extends StatelessWidget {
@@ -25,8 +25,6 @@ class PaywallPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The paywall is drawn on a photograph and is dark whatever the rest of
-    // the app is doing, so it takes the dark palette rather than the theme's.
     return Theme(
       data: AppTheme.dark,
       child: BlocProvider(
@@ -37,13 +35,9 @@ class PaywallPage extends StatelessWidget {
             state: state,
             onSelect: (id) =>
                 context.read<PaywallBloc>().add(PaywallProductSelected(id)),
-            // The same event the screen opens with: a retry is the first load
-            // happening again, and giving it its own event would mean two
-            // handlers to keep in step.
             onRetry: () =>
                 context.read<PaywallBloc>().add(const PaywallStarted()),
-            onClose: () =>
-                unawaited(context.router.replacePath(HomeRoutes.root)),
+            onClose: () => unawaited(_close(context)),
           ),
         ),
       ),
@@ -51,7 +45,20 @@ class PaywallPage extends StatelessWidget {
   }
 }
 
-/// Pure presentation: no DI, no bloc — takes values, returns callbacks.
+/// Back to whatever pushed the paywall, and home when nothing did.
+///
+/// Home pushes it, so there is a screen underneath to pop back to — popping
+/// keeps that screen's scroll position and its already-loaded pages. Onboarding
+/// replaces itself with the paywall instead, leaving an empty stack, and there
+/// closing means going on to home.
+Future<void> _close(BuildContext context) async {
+  final router = context.router;
+
+  if (await router.maybePop()) return;
+
+  await router.replacePath(HomeRoutes.root);
+}
+
 class _PaywallScreen extends StatelessWidget {
   const _PaywallScreen({
     required this.state,
@@ -74,17 +81,12 @@ class _PaywallScreen extends StatelessWidget {
         child: Stack(
           children: [
             const _Backdrop(),
-            // Switched on the status rather than on `isLoading`, so adding a
-            // status is a compile error here instead of a blank screen.
             switch (state.status) {
               PaywallStatus.failed => _Failed(onRetry: onRetry),
               PaywallStatus.initial ||
               PaywallStatus.loading ||
               PaywallStatus.ready => _Content(onSelect: onSelect, state: state),
             },
-            // The SafeArea above keeps its top open so the photograph runs
-            // under the status bar. The button cannot: it is the one thing up
-            // there a finger has to find, so it takes the inset itself.
             Positioned(
               top: MediaQuery.paddingOf(context).top + AppSpacing.s16,
               right: 0,
@@ -179,31 +181,10 @@ class _Plans extends StatelessWidget {
       ],
     );
 
-    if (!loading) return plans;
-
-    return Semantics(
-      label: context.l10n.loading,
-      container: true,
-      child: ExcludeSemantics(
-        child: Skeletonizer(
-          // A shimmer sweeps; "reduce motion" is on for people whom movement
-          // makes ill, so for them the bones simply sit there.
-          effect: MediaQuery.disableAnimationsOf(context)
-              ? SolidColorEffect(color: context.palette.surfaceRaised)
-              : ShimmerEffect(
-                  baseColor: context.palette.surfaceRaised,
-                  highlightColor: context.palette.divider,
-                ),
-          child: plans,
-        ),
-      ),
-    );
+    return AppSkeleton(enabled: loading, child: plans);
   }
 }
 
-/// Enough of a state to lay the plans out with: two of them, because that is
-/// what the design has, and the one carrying a trial selected, because that is
-/// the one the page opens on — and its terms run to two lines.
 const _placeholder = PaywallState(
   status: PaywallStatus.ready,
   selectedId: 'yearly',
@@ -224,11 +205,6 @@ const _placeholder = PaywallState(
   ],
 );
 
-/// Shown when the plans could not be fetched.
-///
-/// The network layer has already retried what is worth retrying on its own, so
-/// by the time this appears the failure has outlasted the automatic attempts
-/// and only the user can decide to try again.
 class _Failed extends StatelessWidget {
   const _Failed({required this.onRetry});
 
@@ -405,8 +381,6 @@ class _Plan extends StatelessWidget {
         SubscriptionPeriod.month => l10n.paywallPeriodMonth,
         SubscriptionPeriod.year => l10n.paywallPeriodYear,
       },
-      // The line under the title is the ongoing cost; the small print at the
-      // foot of the screen carries the first charge.
       detail: product.hasFreeTrial
           ? l10n.paywallYearlyDetail(
               product.freeTrial!.inDays,
@@ -431,8 +405,6 @@ class _Cta extends StatelessWidget {
 
     return FilledButton(
       onPressed: product == null ? null : () {},
-      // A trial is a property of the plan, not of the screen: offering "free
-      // for 3 days" while the monthly plan is selected would be a lie.
       child: Text(
         trial == null
             ? context.l10n.paywallSubscribeCta
@@ -463,12 +435,6 @@ class _SmallPrint extends StatelessWidget {
             product!.initialPrice.format(locale),
           );
 
-    // The monthly terms fit one line and the yearly ones take two, so picking
-    // a plan changes this box's height — and because the page is anchored to
-    // the bottom, that height is what everything above it stands on. Left
-    // alone it snaps, and the whole page appears to twitch. Animating the box
-    // turns the twitch into a slide: the same movement, slow enough to read as
-    // the page making room rather than as a glitch.
     return AnimatedSize(
       duration: Durations.short4,
       curve: Curves.easeInOut,
@@ -505,8 +471,12 @@ class _Links extends StatelessWidget {
       context.l10n.paywallRestore,
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    // Wrapped, not a row: three labels and their separators fit one line at
+    // any ordinary text size and cannot at the accessibility sizes, where a
+    // row would run off the edge and take the links with it.
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         for (final (index, label) in labels.indexed) ...[
           if (index > 0) ExcludeSemantics(child: Text('\u00b7', style: style)),
