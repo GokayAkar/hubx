@@ -34,12 +34,6 @@ abstract final class AppSpacing {
   static double get s32 => 32.w;
 
   static double get s48 => 48.w;
-
-  static double get s64 => 64.w;
-
-  /// The standard horizontal padding of a screen. Named for what it is, not
-  /// what it measures, because it is a decision rather than a number.
-  static double get page => s16;
 }
 
 /// Corner radii, in design units.
@@ -51,8 +45,6 @@ abstract final class AppRadius {
   static double get r14 => 14.w;
 
   static double get r16 => 16.w;
-
-  static double get r24 => 24.w;
 }
 
 /// Fixed sizes that are not spacing: control heights, icon sizes.
@@ -63,9 +55,12 @@ abstract final class AppSize {
   /// Standard icon.
   static double get icon24 => 24.w;
 
-  /// Button height, and the minimum comfortable touch target.
+  /// The smallest a control may be drawn and still be comfortable to hit.
   ///
-  /// Scales up like everything else, but never down: a finger is the same size
-  /// on a narrow phone, so 48 is a floor rather than a proportion.
-  static double get controlHeight => math.max(48, 48.w);
+  /// Unscaled on purpose, and used as a floor rather than a size: a finger is
+  /// the same size on a narrow phone as on a wide one.
+  static const minTouchTarget = 48.0;
+
+  /// Button height: the design's 56, never below [minTouchTarget].
+  static double get controlHeight => math.max(minTouchTarget, 56.w);
 }

@@ -197,7 +197,10 @@ exports an `HttpException`, and a file importing both would not compile.)
 **`RemoteService`**, which every feature's remote data source extends. It
 offers `get` / `post` / `put` / `patch` / `delete`, each taking a path and a
 `JsonParser<T>`; the error translation, reporting and parser wrapping happen
-once, inside:
+once, inside. A parser that throws — a missing field, a number where a string
+was promised — becomes an `ApiParsingException` like any other failure, so a
+malformed response is a handled error rather than a half-built model travelling
+into the UI:
 
 ```dart
 class _CardsService extends RemoteService {
@@ -216,6 +219,48 @@ class _CardsService extends RemoteService {
 Dio features these verbs do not cover — cancellation, upload progress,
 multipart — are added to `RemoteService` as they are needed, rather than by
 reaching around it.
+
+### Models on the wire
+
+**The wire's shape never reaches the app.** A feature's `api/` models are what
+screens read; what the server sends is a set of **DTOs in that feature's
+`impl/`**, each with a `toDomain()` (see
+[home_dtos.dart](lib/features/home/impl/src/home_dtos.dart)). A rename at the
+far end, or an envelope that grows another layer, is then a change to one file
+rather than to every widget that reads a model.
+
+**Their parsing is generated, not written** — `json_serializable`, driven by
+`@JsonSerializable(createToJson: false)`:
+
+```dart
+@JsonSerializable(createToJson: false)
+class _QuestionDto {
+  factory _QuestionDto.fromJson(Map<String, dynamic> json) =>
+      _$QuestionDtoFromJson(json);
+
+  @JsonKey(name: 'image_uri')
+  final String imageUri;
+
+  Question toDomain() => Question(imageUrl: imageUri, /* … */);
+}
+```
+
+Three things fall out of that:
+
+- **`fromJson` cannot rot.** It is the code that is tedious to write, easy to
+  get subtly wrong, and silently wrong when a field is added.
+- **Only `fromJson` is generated.** The app never sends these back, and a
+  `toJson` nobody calls is dead code that still has to be read.
+- **Unknown fields cost nothing.** A category's `image` object carries a dozen
+  fields; the DTO names the one that is used and the generator ignores the
+  rest. A *missing* one throws, and `RemoteService` turns that into
+  `ApiParsingException` — covered in
+  [home_repository_test.dart](test/features/home/impl/home_repository_test.dart).
+
+The DTOs are `part` files of the feature's impl library, so the generated
+`home_impl.g.dart` is a part of that library too — one output per library, not
+one per file — and the DTO classes stay private like everything else under
+`impl/`.
 
 Two interceptors are installed, in this order:
 
@@ -270,23 +315,24 @@ app, and it is the same scale the design is drawn on:
 
 | Group | Values | Scaled by |
 |---|---|---|
-| `AppSpacing` | `s4` `s8` `s12` `s16` `s24` `s32` `s48`, plus `page` (= 16) | width (`.w`) |
-| `AppRadius` | `r8` `r12` `r16` `r24` | the smaller ratio (`.r`), so a circle stays a circle |
-| `AppSize` | `icon20`, `icon24`, `controlHeight` (48) | `.r`, with 48 as a floor |
+| `AppSpacing` | `s4` `s8` `s12` `s16` `s24` `s32` `s48` | width (`.w`) |
+| `AppRadius` | `r8` `r12` `r14` `r16` | width (`.w`) |
+| `AppSize` | `icon20`, `icon24`, `controlHeight` (56) | `.w`, floored at `minTouchTarget` |
 
 Tokens are named for the value on the design, so "24 gap" in a review becomes
 `AppSpacing.s24` with nothing to look up — and because only the steps of the
 scale exist, a stray 13 or 17 cannot be typed in. Where a number is really a
-decision rather than a measurement, it gets a name instead: `AppSpacing.page`,
-`AppSize.controlHeight`.
+decision rather than a measurement, it gets a name instead:
+`AppSize.controlHeight`, `AppSize.minTouchTarget`.
 
 Two deliberate choices:
 
 - **Vertical gaps scale by width too.** Scaling them by height instead would
   stretch a square into a rectangle and make the rhythm differ between a short
   and a tall phone.
-- **`controlHeight` never drops below 48.** A finger does not shrink with the
-  screen, so the minimum touch target is a floor rather than a proportion.
+- **`controlHeight` never drops below `minTouchTarget` (48).** The button is
+  the design's 56 and scales with everything else, but a finger does not shrink
+  with the screen, so 48 is a floor rather than a proportion.
 
 Widget tests render at the reference frame, so the scale is 1 and an overflow a
 real phone would show fails the test.
@@ -318,8 +364,12 @@ file.
 **One file per image, not 1x/2x/3x variants.** Every variant ships in the app
 bundle even though a device uses one, so three of them cost *more* download
 than a single file at the largest size. The cost is memory: a 1080-wide image
-decodes to the same bitmap on every phone, so pass `cacheWidth` where an image
-is shown small.
+decodes to the same bitmap on every phone, so pass `cacheWidth` where a bundled
+image is shown small. Pictures from the network need no such care —
+[RemoteImage](lib/features/home/ui/widgets/remote_image.dart) measures the box
+it was given and decodes to that, because the caller already stated the size by
+laying it out and a number repeated at the call site is one that can disagree
+with it.
 
 Size each file as **display width in points x 3** — not "3x of the Figma
 frame". A full-width image on the largest phone needs about 1080 physical
@@ -393,10 +443,10 @@ the pages slide: inside the `PageView` they travelled with the page. Only the
 heading and the picture are in the pages; everything below sits in the screen
 around them.
 
-The indicator shows three dots for a flow of three screens, so on the steps it
-starts at the second — `AnimatedSmoothIndicator` with `activeIndex: page + 1`
-rather than the controller-driven variant, which assumes dot and page indices
-match.
+The indicator counts the two pages in the `PageView` and nothing else, driven
+by `activeIndex` rather than by the controller: the controller-driven variant
+assumes dot and page indices match, which stops being true the moment the
+welcome screen is counted as a step of the same flow.
 
 Finishing the last page marks onboarding done and replaces the route with
 `/paywall`. Marked *before* the handover, so quitting on the paywall does not
@@ -431,18 +481,20 @@ honest mapping, so [app_text_styles.dart](lib/core/theme/app_text_styles.dart)
 is the source of truth and `AppTheme` builds a `TextTheme` from the handful
 Material's own widgets read.
 
-Tokens are named for what the designer says — weight and size — with the line
-height appended only where two would collide:
+Tokens are named for what the designer says — weight and size:
 
 ```dart
-AppTextStyles.extraBold28      // 28 / 800 / 100% / -1
-AppTextStyles.semiBold16Lh24   // 16 / 600 / 24
-AppTextStyles.semiBold16Lh21   // 16 / 600 / 21
-AppTextStyles.underlined(AppTextStyles.regular11Lh15)
+AppTextStyles.extraBold28   // 28 / 800, tracking -1
+AppTextStyles.semiBold16    // 16 / 600
+AppTextStyles.underlined(AppTextStyles.regular11)
 ```
 
-Line heights are stored as the design's pixel value divided by the font size,
-because Flutter's `height` is a multiple — that ratio is what survives scaling.
+Each token's doc comment carries the design's full spec, and the tracking the
+design asks for is applied in the token rather than at the call site — a
+`letterSpacing` typed onto one heading and forgotten on another is how two
+screens end up with the same style rendered two ways. It scales with the type
+(`.sp`), so it stays proportional rather than staying put as the text grows.
+
 Roboto is bundled at five weights (300/400/500/600/800); the 600 and 800 are
 not in the Flutter SDK and were fetched from Google Fonts, and bundling rather
 than downloading keeps iOS, where Roboto is not a system font, identical to

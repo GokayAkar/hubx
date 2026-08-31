@@ -21,11 +21,28 @@ class RemoteImage extends StatelessWidget {
     // The name of the thing is written next to it in every place this is
     // used, so a screen reader announcing the picture too would say it twice.
     return ExcludeSemantics(
-      child: CachedNetworkImage(
-        imageUrl: url,
-        fit: fit,
-        placeholder: (_, _) => placeholder,
-        errorWidget: (_, _, _) => placeholder,
+      // Decoded at the size it is drawn at, not the size it was uploaded at.
+      // A category tile is 132pt wide and the file behind it is often over a
+      // thousand pixels; decoded whole, one tile costs several megabytes of
+      // memory and the grid holds a screenful of them at a time.
+      //
+      // Measured rather than passed in: the caller already decided the size by
+      // laying this out, and a number repeated at the call site is one that
+      // can disagree with the box it is describing.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+
+          return CachedNetworkImage(
+            imageUrl: url,
+            fit: fit,
+            memCacheWidth: width.isFinite && width > 0
+                ? (width * MediaQuery.devicePixelRatioOf(context)).round()
+                : null,
+            placeholder: (_, _) => placeholder,
+            errorWidget: (_, _, _) => placeholder,
+          );
+        },
       ),
     );
   }

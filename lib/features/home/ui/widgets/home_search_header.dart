@@ -26,7 +26,7 @@ class HomeSearchHeader extends SliverPersistentHeaderDelegate {
   /// The room the greeting needs, from [greetingHeightFor].
   final double greetingHeight;
 
-  static double get _fieldHeight => math.max(48, 48.w);
+  static double get _fieldHeight => math.max(AppSize.minTouchTarget, 48.w);
 
   /// Between the status bar and the greeting. The page's own side margin, so
   /// the corner reads as one deliberate margin rather than two measurements

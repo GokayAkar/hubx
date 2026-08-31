@@ -170,27 +170,33 @@ class _LegalState extends State<_Legal> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final base = AppTextStyles.regular11.copyWith(
       color: context.palette.textTertiary,
     );
     final link = AppTextStyles.underlined(base);
 
+    // Assembled from five pieces because two of them are tappable, and a
+    // gesture cannot be attached to part of a single string. Everything
+    // between them is translated too, punctuation included: Turkish joins the
+    // links with "ve" and inflects the noun after the second one, so a
+    // hardcoded "&" and "." would leave the sentence ungrammatical there.
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: '${context.l10n.onboardingLegal}\n'),
+          TextSpan(text: '${l10n.onboardingLegal}\n'),
           TextSpan(
-            text: context.l10n.onboardingTermsOfUse,
+            text: l10n.onboardingTermsOfUse,
             style: link,
             recognizer: _terms,
           ),
-          const TextSpan(text: ' & '),
+          TextSpan(text: l10n.onboardingLegalSeparator),
           TextSpan(
-            text: context.l10n.onboardingPrivacyPolicy,
+            text: l10n.onboardingPrivacyPolicy,
             style: link,
             recognizer: _privacy,
           ),
-          const TextSpan(text: '.'),
+          TextSpan(text: l10n.onboardingLegalSuffix),
         ],
       ),
       style: base,

@@ -82,11 +82,9 @@ class _Title extends StatelessWidget {
         title,
         style: AppTextStyles.medium28.copyWith(
           color: context.palette.textPrimary,
-          letterSpacing: -1,
         ),
         emphasisStyle: AppTextStyles.extraBold28.copyWith(
           color: context.palette.textPrimary,
-          letterSpacing: -1,
         ),
         // Stretched to the measured width of the emphasised words, so the
         // stroke fits whatever they turn out to be.

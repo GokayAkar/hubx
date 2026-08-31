@@ -15,12 +15,12 @@ abstract final class AppTextStyles {
   static TextStyle get light28 => _style(300, 28);
 
   /// 28 · Medium · 100% · -1
-  static TextStyle get medium28 => _style(500, 28);
+  static TextStyle get medium28 => _style(500, 28, letterSpacing: -1);
 
   static TextStyle get semiBold28 => _style(600, 28);
 
   /// 28 · ExtraBold · 100% · -1
-  static TextStyle get extraBold28 => _style(800, 28);
+  static TextStyle get extraBold28 => _style(800, 28, letterSpacing: -1);
 
   /// 27 · Light · 100%
   static TextStyle get light27 => _style(300, 27);
@@ -31,10 +31,10 @@ abstract final class AppTextStyles {
   static TextStyle get medium24 => _style(500, 24);
 
   /// 20 · Medium · 24 · 0.38
-  static TextStyle get medium20 => _style(500, 20);
+  static TextStyle get medium20 => _style(500, 20, letterSpacing: 0.38);
 
   /// 17 · Light · 24 · 0.38
-  static TextStyle get light17 => _style(300, 17);
+  static TextStyle get light17 => _style(300, 17, letterSpacing: 0.38);
 
   // ------------------------------------------------------------------- 16
 
@@ -79,14 +79,18 @@ abstract final class AppTextStyles {
   static TextStyle underlined(TextStyle style) =>
       style.copyWith(decoration: TextDecoration.underline);
 
+  /// [letterSpacing] is the design's own tracking, in design units, so it
+  /// scales with the text rather than staying put as the type grows.
   static TextStyle _style(
     int weight,
-    double size,
-  ) {
+    double size, {
+    double? letterSpacing,
+  }) {
     return TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.values[weight ~/ 100 - 1],
       fontSize: size.sp,
+      letterSpacing: letterSpacing?.sp,
     );
   }
 }

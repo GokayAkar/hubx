@@ -55,6 +55,37 @@ void main() {
       expect(dark.primary, light.primary);
     });
 
+    testWidgets('what Material fills in for itself is the brand, not a hue '
+        'of its own', (tester) async {
+      // The seed is what Material generates the tones it paints its own
+      // widgets with — a radio, a text button, a text field's cursor — and the
+      // design never drew any of them. A seed that drifts from the brand does
+      // not fail anything; it just quietly puts the wrong colour on every
+      // screen the design did not specify, which is how a green app grows blue
+      // controls.
+      late ColorScheme scheme;
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: kDesignSize,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            home: Builder(
+              builder: (context) {
+                scheme = context.colors;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(AppTheme.seedColor, AppPalette.light.primary);
+      // Generated from the seed rather than equal to it, so the test asks the
+      // question it means: green, and not some other hue.
+      expect(scheme.primary.g, greaterThan(scheme.primary.b));
+      expect(scheme.primary.g, greaterThan(scheme.primary.r));
+    });
+
     test('lerps every colour, so a theme change fades', () {
       final middle = AppPalette.light.lerp(AppPalette.dark, 0.5);
 

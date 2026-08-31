@@ -13,7 +13,7 @@ linter:
   rules:
     # Docs are expected on public API of packages, too noisy for an app.
     public_member_api_docs: false
-    # `flutter run` prints are useful during development.
+    # Diagnostics belong in a LogSink, which a print can never reach.
     avoid_print: true
     # Single-method contracts are the point of the api/impl split.
     one_member_abstracts: false

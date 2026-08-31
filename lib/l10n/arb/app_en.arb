@@ -6,16 +6,6 @@
   },
   "homeTitle": "Home",
   "@homeTitle": {},
-  "homeGreeting": "Hello, {name}!",
-  "@homeGreeting": {
-    "description": "Greeting on the home page",
-    "placeholders": {
-      "name": {
-        "type": "String",
-        "example": "Gokay"
-      }
-    }
-  },
   "onboardingWelcomeTitle": "Welcome to **PlantApp**",
   "@onboardingWelcomeTitle": {
     "description": "Text between ** is the emphasised half of the heading"
@@ -25,21 +15,27 @@
   "onboardingWelcomeAction": "Get Started",
   "@onboardingWelcomeAction": {},
   "onboardingLegal": "By tapping next, you are agreeing to PlantID",
-  "@onboardingLegal": {},
+  "@onboardingLegal": {
+    "description": "Opens the legal line; the two link labels follow it"
+  },
   "onboardingTermsOfUse": "Terms of Use",
   "@onboardingTermsOfUse": {},
   "onboardingPrivacyPolicy": "Privacy Policy",
   "@onboardingPrivacyPolicy": {},
+  "onboardingLegalSeparator": " & ",
+  "@onboardingLegalSeparator": {
+    "description": "Joins the two link labels, spaces included"
+  },
+  "onboardingLegalSuffix": ".",
+  "@onboardingLegalSuffix": {
+    "description": "Closes the legal line after the second link. Languages that inflect the object carry that ending here"
+  },
   "onboardingScanTitle": "Take a photo to **identify** the plant!",
   "@onboardingScanTitle": {},
   "onboardingCareTitle": "Get plant **care guides**",
   "@onboardingCareTitle": {},
   "onboardingContinue": "Continue",
   "@onboardingContinue": {},
-  "homeIncrement": "Count one more",
-  "@homeIncrement": {
-    "description": "Screen reader label for the button that raises the count"
-  },
   "paywallTitle": "**PlantApp** Premium",
   "@paywallTitle": {
     "description": "Text between ** is the emphasised half"
@@ -147,14 +143,5 @@
   "themeDark": "Dark",
   "@themeDark": {},
   "languageSystem": "System language",
-  "@languageSystem": {},
-  "counterLabel": "{count, plural, =0{No taps yet} =1{Tapped once} other{Tapped {count} times}}",
-  "@counterLabel": {
-    "description": "Plural example",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  }
+  "@languageSystem": {}
 }

@@ -5,8 +5,13 @@ import 'package:hubx/core/theme/app_text_styles.dart';
 
 /// Single source of truth for the light and dark [ThemeData] of the app.
 abstract final class AppTheme {
-  /// Brand seed color both schemes are generated from.
-  static const seedColor = Color(0xFF3A6EA5);
+  /// Brand seed colour both schemes are generated from.
+  ///
+  /// Read off the palette rather than written out again: Material generates
+  /// the tones it fills its own widgets with from this, so a seed that drifts
+  /// from the brand shows up as the wrong colour on everything the design
+  /// never drew — a radio, a text button, a text field's cursor.
+  static Color get seedColor => AppPalette.light.primary;
 
   static ThemeData get light => _build(Brightness.light);
 
