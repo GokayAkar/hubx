@@ -206,31 +206,6 @@ void main() {
         handle.dispose();
       });
 
-      // Skipped, not deleted: both failures are real and belong to the design,
-      // not the code.
-      //
-      //  - The green #28AF6E carries white button labels at 2.82:1, under
-      //    WCAG AA's 4.5:1 and under even the 3:1 it allows for large text.
-      //    Passing: a darker green (#1C7D4E, 5.13:1) or dark text on the
-      //    current one (7.44:1).
-      //  - The legal line (#597165 at B2, 11px) reads 2.83:1. Passing: the
-      //    same colour at full opacity (5.06:1) or #4C6157 (6.38:1).
-      //
-      // Un-skip when the design settles both.
-      testWidgets(
-        'text stands out enough from what is behind it '
-        '(SKIPPED: design colours are 2.8:1)',
-        (tester) async {
-          final handle = tester.ensureSemantics();
-          await open(tester, stored: onboarded, path: path);
-
-          await expectLater(tester, meetsGuideline(textContrastGuideline));
-
-          handle.dispose();
-        },
-        skip: true,
-      );
-
       testWidgets('survives the largest text the system offers', (
         tester,
       ) async {

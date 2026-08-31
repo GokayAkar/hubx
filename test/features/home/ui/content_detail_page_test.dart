@@ -51,8 +51,19 @@ void main() {
     await tester.pumpWidget(App(startup: await AppStartupLoader.load()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('How to identify plants?'));
+    // Scrolled to first: at the accessibility text sizes the row sits behind
+    // the bottom bar, and a tap there lands on the bar. Without this the tap
+    // silently misses and the test goes on to check the home page while
+    // claiming to check this one.
+    final card = find.text('How to identify plants?');
+    await tester.ensureVisible(card);
     await tester.pumpAndSettle();
+    await tester.tap(card);
+    await tester.pumpAndSettle();
+
+    // Proof that the tap arrived: everything below asks about the detail
+    // screen, and all of it would pass just as well on the home page.
+    expect(find.textContaining('Lorem ipsum'), findsOneWidget);
   }
 
   group('content detail', () {
