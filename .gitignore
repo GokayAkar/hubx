@@ -44,8 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Generated code
-*.g.dart
-*.gr.dart
-*.gen.dart
-lib/l10n/generated/
+# Generated code is committed on purpose, so a fresh clone builds with
+# `flutter pub get && flutter run` and needs no build_runner pass first.
+# Regenerate with `dart run build_runner build` after changing a route, an
+# asset or a DTO; `flutter gen-l10n` after changing an .arb.

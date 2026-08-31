@@ -7,11 +7,18 @@ feature split into api / impl / ui.
 
 ```bash
 flutter pub get                     # dependencies
-flutter gen-l10n                    # .arb -> lib/l10n/generated (also runs on pub get)
-dart run build_runner watch         # auto_route + json_serializable codegen
 flutter run                         # run the app
 flutter analyze && flutter test     # checks
 dart run tool/check_layer_deps.dart # guard against impl leaking (CI)
+```
+
+Generated code is **committed**, so a fresh clone runs on those two lines
+alone. Regenerate after changing a route, an asset or a DTO:
+
+```bash
+dart run build_runner build         # auto_route + flutter_gen + json_serializable
+flutter gen-l10n                    # .arb -> lib/l10n/generated (also runs on pub get)
+dart run build_runner watch         # or leave this running while you work
 ```
 
 ## Architecture
