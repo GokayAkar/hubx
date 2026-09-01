@@ -12,8 +12,29 @@ flutter analyze && flutter test     # checks
 dart run tool/check_layer_deps.dart # guard against impl leaking (CI)
 ```
 
+Every one of those runs on CI too
+([ci.yml](.github/workflows/ci.yml)), on each push to `main` and each pull
+request, alongside an Android and an unsigned iOS build. The Flutter version
+is pinned there rather than tracking `stable`, so an upstream release cannot
+turn a branch nobody touched red.
+
+The same checks run locally before a push, if you opt in once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+[.githooks/pre-push](.githooks/pre-push) then runs formatting, analysis, the
+layer check and the tests in about twenty seconds, and refuses the push if any
+of them fail — a failure caught here costs nothing, while the same one caught
+on GitHub leaves a red mark next to a commit that stays there after the fix.
+It skips the builds, which take minutes and belong in CI, so a green hook is a
+good sign rather than a guarantee. `git push --no-verify` bypasses it.
+
 Generated code is **committed**, so a fresh clone runs on those two lines
-alone. Regenerate after changing a route, an asset or a DTO:
+alone. CI regenerates it and fails if the result differs from what is checked
+in — the trade only holds while the committed output still matches its
+sources. Regenerate after changing a route, an asset or a DTO:
 
 ```bash
 dart run build_runner build         # auto_route + flutter_gen + json_serializable
