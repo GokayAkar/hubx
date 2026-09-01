@@ -44,6 +44,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Release signing. The keystore *is* the app's identity on the Play Store: an
+# attacker with it can ship an update to your users, and losing it means no one
+# can ever update the app again. It lives in a password manager and in CI
+# secrets, never here.
+/android/key.properties
+*.jks
+*.keystore
+
 # Generated code is committed on purpose, so a fresh clone builds with
 # `flutter pub get && flutter run` and needs no build_runner pass first.
 # Regenerate with `dart run build_runner build` after changing a route, an

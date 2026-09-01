@@ -42,6 +42,58 @@ flutter gen-l10n                    # .arb -> lib/l10n/generated (also runs on p
 dart run build_runner watch         # or leave this running while you work
 ```
 
+## Releases
+
+**A tag is what ships.** Pushing `v1.2.0` runs
+[release.yml](.github/workflows/release.yml): it builds a signed App Bundle and
+an APK, and attaches both to a GitHub Release with generated notes. Nothing
+ships on a merge to `main` — staying green and cutting a release are separate
+decisions, taken by different acts.
+
+**The version lives in the tag, not in `pubspec.yaml`.** The build reads the
+name from the tag and the build number from the run number, so there is no
+second copy to disagree with the first. `pubspec.yaml`'s version is a
+placeholder for local builds.
+
+**The signing key is never in the repository.** `android/key.properties` and
+the keystore are git-ignored; CI writes them from secrets, uses them, and
+discards them with the runner. To set that up:
+
+```bash
+keytool -genkeypair -v -keystore android/upload-keystore.jks \
+  -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+Then `android/key.properties` (git-ignored) with `storePassword`,
+`keyPassword`, `keyAlias=upload`, `storeFile=upload-keystore.jks`, and four
+repository secrets: `ANDROID_KEYSTORE_BASE64` (`base64 -i
+android/upload-keystore.jks`), `ANDROID_STORE_PASSWORD`,
+`ANDROID_KEY_PASSWORD`, `ANDROID_KEY_ALIAS`.
+
+**Without those secrets nothing breaks** — the release build falls back to the
+debug key ([build.gradle.kts](android/app/build.gradle.kts)), so a fork still
+produces an installable APK. Only the signature differs, and CI says so in a
+warning rather than failing.
+
+**Store upload is written down, not wired up.** The lanes exist
+([android](android/fastlane/Fastfile), [ios](ios/fastlane/Fastfile)) but the
+credentials do not: Play needs a service account and an app in the console,
+TestFlight needs an Apple Developer Program membership and a distribution
+certificate. Wiring a lane that cannot run and pretending otherwise would be
+worse than saying so here.
+
+**iOS therefore ships two things, both free of credentials.** A release build
+compiled unsigned, which is what catches an iOS-only break; and a **Simulator
+build uploaded as an artifact**, which is the one iOS build that can be handed
+to someone who has no Apple account — download, unzip, drag onto a running
+Simulator. A device build cannot be given away without signing it, so this is
+where the free path ends.
+
+Both platforms take their Xcode and Flutter versions from the workflow rather
+than from whatever the runner image happens to ship, because an iOS build that
+starts failing on a commit which touched no iOS code costs an afternoon to
+diagnose.
+
 ## Architecture
 
 Every feature has three layers, and **only the api layer is visible to the rest

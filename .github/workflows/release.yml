@@ -1,0 +1,188 @@
+name: Release
+
+# Cutting a release is an explicit act, not a side effect of merging: push a
+# tag and this builds the artifacts that tag names. Nothing here runs on a
+# normal push, so `main` staying green and shipping a build stay separate
+# decisions.
+on:
+  push:
+    tags: ["v*"]
+  # Also runnable by hand, to rehearse the pipeline without spending a version
+  # number on it.
+  workflow_dispatch:
+
+permissions:
+  contents: write # creating the GitHub Release
+
+env:
+  FLUTTER_VERSION: "3.41.2"
+
+jobs:
+  android:
+    name: Android release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The tag is the single source of truth for the version. pubspec.yaml
+      # carries a placeholder, because a number that lives in two places is a
+      # number that will disagree with itself.
+      - name: Derive version
+        id: version
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            name="${GITHUB_REF_NAME#v}"
+          else
+            name="0.0.0-dev"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          # Monotonic and never reused, which is all the Play Store asks of it.
+          echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "Building $name (${GITHUB_RUN_NUMBER})"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # The keystore never exists in the repository. It is restored here from
+      # secrets, used, and thrown away with the runner.
+      #
+      # Absent secrets are not an error: the build falls back to the debug key
+      # (see android/app/build.gradle.kts) so a fork can still produce an
+      # installable APK. Only the signature differs.
+      - name: Restore upload keystore
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [[ -z "$KEYSTORE_BASE64" ]]; then
+            echo "::warning::No signing secrets set — falling back to debug keys."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      # The bundle is what Play distributes; the APK is what a human can
+      # sideload to try the build. Both, because they answer different needs.
+      - name: Build App Bundle
+        run: |
+          flutter build appbundle --release \
+            --build-name "${{ steps.version.outputs.name }}" \
+            --build-number "${{ steps.version.outputs.code }}"
+
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --build-name "${{ steps.version.outputs.name }}" \
+            --build-number "${{ steps.version.outputs.code }}"
+
+      # Proves the signature is the upload key rather than the debug one — the
+      # difference is invisible in the file name and fatal at upload time.
+      - name: Verify signature
+        if: steps.signing.outputs.signed == 'true'
+        run: |
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$apk" \
+            | grep -E 'Signer #1 certificate (DN|SHA-256)'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+
+  # Kept separate from Android so one store's outage or credential problem
+  # cannot hold the other's release hostage.
+  ios:
+    name: iOS release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The runner's default Xcode changes without warning when GitHub updates
+      # the image, which is how an iOS build starts failing on a commit that
+      # touched no iOS code. Stated explicitly so the choice is visible; pin an
+      # exact version here once one is known good.
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # The same version the Android job derives, from the same tag: two
+      # platforms disagreeing about what "1.2.0" contains is a support problem
+      # that starts here.
+      - name: Derive version
+        id: version
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            name="${GITHUB_REF_NAME#v}"
+          else
+            name="0.0.0-dev"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      # Unsigned, and honestly so. An .ipa for TestFlight needs an Apple
+      # Developer Program membership, a distribution certificate and an App
+      # Store Connect API key — none of which belong to this repository.
+      # ios/fastlane/Fastfile has the lane that does it, and it runs the day
+      # those credentials exist. This still catches an iOS-only break in a
+      # release build, which is the part that can be checked for free.
+      - name: Build (unsigned)
+        run: |
+          flutter build ios --release --no-codesign \
+            --build-name "${{ steps.version.outputs.name }}" \
+            --build-number "${{ steps.version.outputs.code }}"
+
+      # What a reviewer can actually run. A device build needs signing; a
+      # simulator build needs nothing, so this is the one iOS artifact that can
+      # be handed to someone without an Apple account between us. Unzip, drag
+      # onto a running Simulator.
+      - name: Build for Simulator
+        run: |
+          flutter build ios --simulator --debug \
+            --build-name "${{ steps.version.outputs.name }}" \
+            --build-number "${{ steps.version.outputs.code }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-app
+          path: build/ios/iphonesimulator/Runner.app
+          if-no-files-found: error
