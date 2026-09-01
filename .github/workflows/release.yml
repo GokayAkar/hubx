@@ -95,14 +95,37 @@ jobs:
             --build-name "${{ steps.version.outputs.name }}" \
             --build-number "${{ steps.version.outputs.code }}"
 
-      # Proves the signature is the upload key rather than the debug one — the
-      # difference is invisible in the file name and fatal at upload time.
+      # Proves the signature is the upload key rather than the debug one. The
+      # difference is invisible in the file name and only shows up at upload
+      # time, by which point the release has already been announced.
       - name: Verify signature
         if: steps.signing.outputs.signed == 'true'
         run: |
           apk=build/app/outputs/flutter-apk/app-release.apk
-          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$apk" \
-            | grep -E 'Signer #1 certificate (DN|SHA-256)'
+
+          # One apksigner, chosen deliberately: the runner ships several
+          # build-tools versions, so an unquoted glob expands to a list and the
+          # second path is read as the command to run.
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null \
+            | sort -V | tail -1)
+          if [[ -z "$apksigner" ]]; then
+            echo "::error::No apksigner under $ANDROID_HOME/build-tools"
+            exit 1
+          fi
+          echo "Using $apksigner"
+
+          # Full output into the log: when this step is the one that failed,
+          # the scheme versions and warnings around the certificate are what
+          # you need, and they are gone by the time you think to ask for them.
+          "$apksigner" verify --print-certs "$apk" | tee certs.txt
+
+          # The assertion that matters. Signing silently falls back to the
+          # debug key when a secret is missing or misnamed, and a debug-signed
+          # build looks perfectly healthy until the store rejects it.
+          if grep -q 'CN=Android Debug' certs.txt; then
+            echo "::error::Signed with the debug key — check the ANDROID_* secrets."
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
