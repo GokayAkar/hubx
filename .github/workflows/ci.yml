@@ -99,6 +99,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The runner's default Xcode moves when GitHub updates the image, which
+      # is how an iOS build starts failing on a commit that touched no iOS
+      # code. Stated explicitly rather than inherited.
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}

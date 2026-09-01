@@ -1,0 +1,45 @@
+# TestFlight distribution.
+#
+# Nothing here runs today: an .ipa needs an Apple Developer Program membership,
+# a distribution certificate and an App Store Connect API key, and this
+# repository has none of them. CI builds iOS unsigned for exactly that reason
+# (.github/workflows/release.yml).
+#
+# It is written down anyway, because the shape of the answer is the part worth
+# agreeing on before a release is due — where certificates come from, what is
+# read-only on CI, and which credentials have to exist.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do |options|
+    # Certificates come from an encrypted repository rather than from whoever
+    # happens to have them in their keychain, so CI and every machine sign with
+    # the same identity. Read-only on CI: a build server should never be able
+    # to revoke the team's certificates.
+    setup_ci if ENV["CI"]
+    match(type: "appstore", readonly: is_ci)
+
+    Dir.chdir("../..") do
+      sh(
+        "flutter", "build", "ios", "--release", "--no-codesign",
+        "--build-name", options[:version] || "0.0.0-dev",
+        "--build-number", (options[:build] || "1").to_s
+      )
+    end
+
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store"
+    )
+
+    # No changelog and no review submission: this is a build for testers, and
+    # the release notes belong to the release, not to every upload.
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+end
