@@ -29,7 +29,7 @@ jobs:
     name: Format, analyze & test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -72,11 +72,11 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # AGP 8.11 and Kotlin 2.2 both target 17; the runner's default JDK is
       # not guaranteed to be.
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -94,7 +94,7 @@ jobs:
 
       # Downloadable from the run's summary page, so a reviewer can install the
       # branch on a phone without a toolchain of their own.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: app-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
@@ -104,7 +104,7 @@ jobs:
     name: Build iOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The runner's default Xcode moves when GitHub updates the image, which
       # is how an iOS build starts failing on a commit that touched no iOS
