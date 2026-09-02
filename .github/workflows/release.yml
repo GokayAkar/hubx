@@ -22,7 +22,7 @@ jobs:
     name: Android release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The tag is the single source of truth for the version. pubspec.yaml
       # carries a placeholder, because a number that lives in two places is a
@@ -40,7 +40,7 @@ jobs:
           echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
           echo "Building $name (${GITHUB_RUN_NUMBER})"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -127,7 +127,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android-release
           path: |
@@ -137,7 +137,7 @@ jobs:
 
       - name: Publish GitHub Release
         if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           files: |
@@ -150,7 +150,7 @@ jobs:
     name: iOS release
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The runner's default Xcode changes without warning when GitHub updates
       # the image, which is how an iOS build starts failing on a commit that
@@ -204,7 +204,7 @@ jobs:
             --build-name "${{ steps.version.outputs.name }}" \
             --build-number "${{ steps.version.outputs.code }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ios-simulator-app
           path: build/ios/iphonesimulator/Runner.app
