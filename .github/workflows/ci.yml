@@ -1,9 +1,16 @@
 name: CI
 
+# Pull requests only. The ruleset requires a branch to be up to date with
+# `main` before it can merge, so the pull request's run already tests exactly
+# the content that will land — and nothing can reach `main` except through a
+# pull request. A second run after the merge would re-test the same tree under
+# a new commit hash and report nothing new.
+#
+# `workflow_dispatch` stays, for the days you want to hear it from `main`
+# itself rather than from the branch that was about to become it.
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 # A second push to the same branch makes the first one's answer worthless, so
 # it is cancelled rather than left to finish and report on stale code.
